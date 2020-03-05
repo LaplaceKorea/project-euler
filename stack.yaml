@@ -42,7 +42,6 @@ packages:
 extra-deps:
   - combinat-0.2.9.0@sha256:3daed23a2376f8d9903dc2c1c3758f1f2a0527178c81023080507e5f5ddf5b7a,5107
   - lens-4.19.1@sha256:6bbc0b145b037537d468b0810ea2a560beda999f89444fe4101061c7892cd596,15551
-
 # Override default flag values for local packages and extra-deps
 # flags: {}
 

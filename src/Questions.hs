@@ -448,7 +448,7 @@ q036 :: Integer
 -- (Please note that the palindromic number, in either base, may not include leading zeros.)
 q036 = sum $ filter (liftM2 (&&) palindrome palindrome2) [1..1000000] where
     palindrome2 :: Integer -> Bool
-    -- Convert to a Word(32) because Integer has arbitrary size and the numbers we're testing are positive and less than 1e6
+    -- ! Convert to a Word(32) because Integer has arbitrary size and the numbers we're testing are positive and less than 1e6
     palindrome2 n = ap (==) reverse . dropWhile not . reverse $ toListOf bits (fromIntegral n :: Word32)
 
 q037 :: Integer
@@ -501,7 +501,8 @@ q040 = product $ map ((champernowne !!) . (10^)) [0..6] where
 q041 :: Integer
 -- We shall say that an n-digit number is pandigital if it makes use of all the digits 1 to n exactly once. For example, 2143 is a 4-digit pandigital and is also prime.
 -- What is the largest n-digit pandigital prime that exists?
-q041 = head . filter pandigital1 . reverse . takeWhile (< 100000000) $ primes
+q041 = last . filter pandigital1 . takeWhile (< 10000000) $ primes
+-- ! cannot have 8 or 9 digits as (sum [1..8]) and (sum [1..9]) are divisible by 3
 
 q042 :: Integer
 -- The nth term of the sequence of triangle numbers is given by, tn = ½n(n+1); so the first ten triangle numbers are:
@@ -517,7 +518,8 @@ q042 = fromIntegral $ count ((\n -> n `elem` takeWhile (<=n) triangles) . sum . 
     value = fromIntegral . head . (`elemIndices` ('_':['A'..'Z']))
 
 q043 :: Integer
--- The number, 1406357289, is a 0 to 9 pandigital number because it is made up of each of the digits 0 to 9 in some order, but it also has a rather interesting sub-string divisibility property.
+-- The number, 1406357289, is a 0 to 9 pandigital number because it is made up of each of the digits
+-- 0 to 9 in some order, but it also has a rather interesting sub-string divisibility property.
 -- Let d(1) be the 1st digit, d(2) be the 2nd digit, and so on. In this way, we note the following:
 --     d(2)d(3)d(4) = 406 is divisible by 2
 --     d(3)d(4)d(5) = 063 is divisible by 3
@@ -557,7 +559,7 @@ q045 :: Integer
 -- It can be verified that T(285) = P(165) = H(143) = 40755.
 -- Find the next triangle number that is also pentagonal and hexagonal.
 q045 = filter isPentagonal hexagons !! 2 where
-    -- all hexagonal numbers are triangular!
+    -- ! all hexagonal numbers are triangular!
     isPentagonal :: Integer -> Bool
     isPentagonal x = let q = (sqrt (24 * fromIntegral x + 1) + 1) / 6 :: Double
                      in  floor q == ceiling q
@@ -630,7 +632,7 @@ q050 :: Integer
 -- The longest sum of consecutive primes below one-thousand that adds to a prime, contains 21 terms, and is equal to 953.
 -- Which prime, below one-million, can be written as the sum of the most consecutive primes?
 q050 = (\(_,_,s) -> s) . maximumOn (\(_,k,_) -> k) . take 10 $ map last consecutivePrimeSums where
-    -- the longest chain likely starts from one of the smallest primes!
+    -- ! the longest chain likely starts from one of the smallest primes!
     consecutivePrimeSums :: [[(Integer, Integer, Integer)]]
     consecutivePrimeSums = groupOn (\(x,_,_) -> x) $ consecutivePrimeSums' 0 1 where
         consecutivePrimeSums' n k
@@ -722,6 +724,7 @@ q054 :: Integer
 -- each player's hand is in no specific order, and in each hand there is a clear winner.
 -- How many hands does Player 1 win?
 q054 = count (uncurry (>)) in054
+-- ! in054 declared in Poker.hs
 
 q055 :: Integer
 -- If we take 47, reverse and add, 47 + 74 = 121, which is palindromic.
@@ -776,7 +779,7 @@ q058 :: Integer
 -- is that 8 out of the 13 numbers lying along both diagonals are prime; that is, a ratio of 8/13 ≈ 62%.
 -- If one complete new layer is wrapped around the spiral above, a square spiral with side length 9 will be formed.
 -- If this process is continued, what is the side length of the square spiral for which the ratio of primes along both diagonals first falls below 10%?
-q058 = (`div` 2) . (+1) . head $ filter ((<0.1) . primeRatio . flip genericTake (spiralDiagonals 25001)) [5,9..] where
+q058 = (`div` 2) . (+1) . head $ filter ((<0.1) . primeRatio . flip genericTake (spiralDiagonals 25001)) [25001..50001] where
     primeRatio :: [Integer] -> Double
     primeRatio xs = fromIntegral (count isPrime xs) / genericLength xs
 
@@ -910,8 +913,8 @@ q = \case
     56  -> q056
     57  -> q057
     58  -> q058
-    -- 59  -> q059
-    -- 60  -> q060
+    59  -> q059
+    60  -> q060
     -- 61  -> q061
     -- 62  -> q062
     -- 63  -> q063
