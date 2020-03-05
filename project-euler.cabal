@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 3d4002d4f87ee9ab388a9977880d59cc278f3a18577c6ad8de4a36526598e1b3
+-- hash: 4e80e9319540f1406bb0f0369d343a737ce1dc23140e96ade5163f5fbd55d251
 
 name:           project-euler
 version:        0.1.0.0
@@ -29,6 +29,7 @@ library
   exposed-modules:
       CalendarExtra
       NumbersExtra
+      Poker
       Polynomials
       Questions
   other-modules:
@@ -37,12 +38,14 @@ library
       src
   default-extensions: LambdaCase MultiWayIf TupleSections NamedFieldPuns BangPatterns ViewPatterns TypeOperators KindSignatures InstanceSigs OverloadedStrings EmptyCase GeneralizedNewtypeDeriving DeriveFoldable DeriveFunctor DeriveGeneric DeriveLift DeriveTraversable
   build-depends:
-      base >=4.7 && <5
+      array >=0.5.4 && <0.6
+    , base >=4.7 && <5
     , combinat >=0.2.9 && <0.3
     , containers >=0.6.2 && <0.7
     , data-default-class >=0.1.2 && <0.2
     , exact-combinatorics >=0.2 && <0.3
     , extra >=1.6 && <1.7
+    , fitspec >=0.4.7 && <0.5
     , ghc >=8.8.2 && <8.9
     , ilist >=0.4 && <0.5
     , lens >=4.19 && <4.20
@@ -58,12 +61,14 @@ executable project-euler-exe
   default-extensions: LambdaCase MultiWayIf TupleSections NamedFieldPuns BangPatterns ViewPatterns TypeOperators KindSignatures InstanceSigs OverloadedStrings EmptyCase GeneralizedNewtypeDeriving DeriveFoldable DeriveFunctor DeriveGeneric DeriveLift DeriveTraversable
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.7 && <5
+      array >=0.5.4 && <0.6
+    , base >=4.7 && <5
     , combinat >=0.2.9 && <0.3
     , containers >=0.6.2 && <0.7
     , data-default-class >=0.1.2 && <0.2
     , exact-combinatorics >=0.2 && <0.3
     , extra >=1.6 && <1.7
+    , fitspec >=0.4.7 && <0.5
     , ghc >=8.8.2 && <8.9
     , ilist >=0.4 && <0.5
     , lens >=4.19 && <4.20

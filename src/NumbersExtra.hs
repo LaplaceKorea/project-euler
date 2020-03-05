@@ -5,11 +5,11 @@ module NumbersExtra
     , module Math.Combinat.Partitions.Integer
     , module Polynomials
     , count
-    , isPrime, primes, primeFactors
+    , isPrime, primes, primeFactors, distinctPrimeFactors
     , ngons, triangles, squares, pentagons, hexagons, heptagons, octagons
     -- , ngonal, triangular, quadrilateral, pentagonal, hexagonal, heptagonal, octagonal
     , fibonaccis, fibonacciSequence
-    , digits, undigits, backwards, palindrome
+    , digits, undigits, backward, palindrome, pandigital0, pandigital1
     , divisors, numDivisors, properDivisors, amicable, deficient, perfect, abundant
     , pythags
     , collatz
@@ -36,6 +36,10 @@ count :: (a -> Bool) -> [a] -> Integer
 count = (fromIntegral .) . Util.count
 
 
+distinctPrimeFactors :: Integer -> [Integer]
+distinctPrimeFactors = nubOrd . primeFactors
+
+
 ngons :: Integer -> [Integer]
 ngons s = ngons' s 1 (s-1) where
     ngons' s n m = n : ngons' s (n+m) (m+s-2)
@@ -58,10 +62,14 @@ digits :: (Integral a, Read a, Show a) => a -> [a]
 digits = map (read . pure) . show
 undigits :: (Integral a, Read a, Show a) => [a] -> a
 undigits = read . concatMap show
-backwards :: (Integral a, Read a, Show a) => a -> a
-backwards = undigits . reverse . digits
+backward :: (Integral a, Read a, Show a) => a -> a
+backward = undigits . reverse . digits
 palindrome :: (Integral a, Read a, Show a, Eq a) => a -> Bool
-palindrome = ap (==) backwards
+palindrome = ap (==) backward
+pandigital0 :: Integer -> Bool
+pandigital0 n = let k = genericLength (digits n) in null ([0..k] \\ digits n)
+pandigital1 :: Integer -> Bool
+pandigital1 n = let k = genericLength (digits n) in null ([1..k] \\ digits n)
 
 
 divisors :: Integer -> [Integer]
@@ -95,7 +103,7 @@ reciprocal = reciprocal' 1 where
         | n `mod` x == 0 = [n `div` x]
         | otherwise      = (last . digits) (n `div` x) : reciprocal' (10 * n) x
 continuedFraction :: Integer -> Integer -> [Integer] -> [Rational]
-continuedFraction outside numer denoms = outside % 1 : continuedFraction' outside numer denoms (numer % (head denoms)) where
+continuedFraction outside numer denoms = outside % 1 : continuedFraction' outside numer denoms (numer % head denoms) where
     continuedFraction' :: Integer -> Integer -> [Integer] -> Rational -> [Rational]
     continuedFraction' outside _     []     frac = [outside % 1 + frac]
     continuedFraction' outside numer denoms frac =
