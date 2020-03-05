@@ -5,11 +5,11 @@ import           Control.Arrow
 import           Control.Lens
 import           Data.Bits.Lens
 import           Data.Char
-import           Data.List.Index
 import qualified Data.Map as M
 import           Data.Map (Map, (!))
 import qualified Data.Set as S
 import           Data.Set (Set)
+import           Data.Word (Word32)
 import           NumbersExtra
 import           System.IO.Unsafe
 
@@ -280,7 +280,7 @@ q022 :: Integer
 -- For example, when the list is sorted into alphabetical order, COLIN, which is worth 3 + 15 + 12 + 9 + 14 = 53, is the 938th name in the list.
 -- So, COLIN would obtain a score of 938 × 53 = 49714.
 -- What is the total of all the name scores in the file?
-q022 = sum . map (uncurry (*) . (fromIntegral *** sum . map value)) . indexed $ "" : sort in022 where
+q022 = sum . zipWith (\x y -> x * (sum . map value) y) [0..] $ "" : sort in022 where
     in022 :: [String]
     in022 = map (filter isAlpha) . splitOn "\",\"" . unsafePerformIO $ readFile "./Inputs/022.txt"
 
@@ -444,7 +444,24 @@ q036 :: Integer
 -- (Please note that the palindromic number, in either base, may not include leading zeros.)
 q036 = sum $ filter (liftM2 (&&) palindrome palindrome2) [1..1000000] where
     palindrome2 :: Integer -> Bool
-    palindrome2 n = ap (==) reverse . dropWhile not . reverse $ toListOf bits n
+    -- Convert to a Word32 because Integer has arbitrary size and the numbers we're testing are positive and less than 1e6
+    palindrome2 n = ap (==) reverse . dropWhile not . reverse $ toListOf bits (fromIntegral n :: Word32)
+
+q037 :: Integer
+-- The number 3797 has an interesting property. Being prime itself, it is possible to continuously remove digits from left to right,
+-- and remain prime at each stage: 3797, 797, 97, and 7. Similarly we can work from right to left: 3797, 379, 37, and 3.
+-- Find the sum of the only eleven primes that are both truncatable from left to right and right to left.
+-- NOTE: 2, 3, 5, and 7 are not considered to be truncatable primes.
+q037 = sum . filter (liftM2 (&&) truncLeft truncRight) . takeWhile (< 1000000) $ dropWhile (< 10) primes where
+    truncLeft :: Integer -> Bool
+    truncLeft n
+        | n < 10    = isPrime n
+        | otherwise = isPrime n && truncLeft (undigits . tail $ digits n)
+
+    truncRight :: Integer -> Bool
+    truncRight n
+        | n < 10    = isPrime n
+        | otherwise = isPrime n && truncRight (undigits . init $ digits n)
 
 
 

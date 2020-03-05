@@ -11,6 +11,13 @@ packages:
       sha256: 7c14bb4cc6cb0b2d6f14ae8265241966fe6c2e07827d18acad8de1bdc1ba8540
   original:
     hackage: combinat-0.2.9.0@sha256:3daed23a2376f8d9903dc2c1c3758f1f2a0527178c81023080507e5f5ddf5b7a,5107
+- completed:
+    hackage: lens-4.19.1@sha256:6bbc0b145b037537d468b0810ea2a560beda999f89444fe4101061c7892cd596,15551
+    pantry-tree:
+      size: 8329
+      sha256: f51cd6be482804001bf9868fe4a552d01a6c3a4e367c16bd3df0ad74b755ac2c
+  original:
+    hackage: lens-4.19.1@sha256:6bbc0b145b037537d468b0810ea2a560beda999f89444fe4101061c7892cd596,15551
 snapshots:
 - completed:
     size: 491372
