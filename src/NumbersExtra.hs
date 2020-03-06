@@ -46,20 +46,24 @@ where
 
 import           Control.Monad
 import           Data.List.Extra
-import           Data.Numbers.Primes            ( isPrime
-                                                , primes
-                                                , primeFactors
-                                                )
+import qualified Data.Numbers.Primes as P
 import           Data.Ratio
 import           Math.Combinat.Partitions.Integer
 import           Math.Combinatorics.Exact.Binomial
 import           Math.Combinatorics.Exact.Factorial
+import           Math.NumberTheory.Primes.Testing (isPrime)
 import           Polynomials
 import qualified Util
 
 -- | count b xs == genericLength (filter b xs)
 count :: (Integral b) => (a -> Bool) -> [a] -> b
 count = (fromIntegral .) . Util.count
+
+primes :: [Integer]
+primes = P.primes :: [Integer]
+
+primeFactors :: Integer -> [Integer]
+primeFactors = P.primeFactors
 
 distinctPrimeFactors :: Integer -> [Integer]
 distinctPrimeFactors = nubOrd . primeFactors
