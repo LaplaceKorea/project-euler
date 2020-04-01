@@ -188,8 +188,7 @@ continuedFraction outside numer denoms = outside % 1 : continuedFraction' outsid
 
 -- | `spiralDiagonals k` lists the numbers appearing on the diagonals of the Ulam spiral of side length `k`, in order from 1.
 spiralDiagonals :: Integer -> [Integer]
-spiralDiagonals k = spiralDiagonals' 0 0 [1 .. k ^ 2]
-  where
+spiralDiagonals k = spiralDiagonals' 0 0 [1 .. k ^ 2] where
     spiralDiagonals' _ _ [] = []
     spiralDiagonals' n 0 xs = case genericDrop (n - 1) xs of
         []       -> []
