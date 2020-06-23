@@ -22,6 +22,7 @@ description:         Please see the README on GitHub at <https://github.com/mel-
 dependencies:
   - arithmoi            >= 0.10  && < 0.11
   - array               >= 0.5.4 && < 0.6
+  - async
   - base                >= 4.7   && < 5
   - containers          >= 0.6.2 && < 0.7
   - combinat            >= 0.2.9 && < 0.3
@@ -32,12 +33,13 @@ dependencies:
   - ghc                 >= 8.8.2 && < 8.9
   - lens                >= 4.19  && < 4.20
   - primes              >= 0.2   && < 0.3
+  - time
 
 default-extensions:
   - LambdaCase
   - MultiWayIf
   - TupleSections
-  - NamedFieldPuns
+  - RecordWildCards
   - BangPatterns
   - ViewPatterns
   - TypeOperators

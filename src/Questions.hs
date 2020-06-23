@@ -2,7 +2,7 @@ module Questions where
 
 import           CalendarExtra
 import           Control.Arrow
-import           Control.Lens
+import           Control.Lens hiding ((:>))
 import           Data.Array
 import           Data.Bits
 import           Data.Bits.Lens
@@ -12,6 +12,8 @@ import qualified Data.Map as M
 import           Data.Map (Map)
 import qualified Data.Set as S
 import           Data.Set (Set)
+import           Data.Sequence (Seq, ViewR(..), viewr)
+import qualified Data.Sequence as Seq
 import           Data.Word (Word32)
 import           NumbersExtra
 import           Poker
@@ -519,7 +521,7 @@ q032 :: Integer
     can be written as a 1 through 9 pandigital.
     HINT: Some products can be obtained in more than one way so be sure to only include it once in your sum.
 -}
-q032 = count (liftM2 (&&) pandigital1 (or . ([onefourfour, twothreefour] <*>) . pure)) [123456789..987654321] where
+q032 = sum . nub . filter (or . ([onefourfour, twothreefour] <*>) . pure) $ pandigitals1 9 where
     onefourfour :: Integer -> Bool
     onefourfour (digits -> xs) = let x1 = head xs
                                      x2 = undigits . take 4 $ tail xs
@@ -578,7 +580,7 @@ q036 = sum $ filter (liftM2 (&&) palindrome palindrome2) [1..1000000] where
     palindrome2 :: Integer -> Bool
     -- ! Convert to a Word32 because Integer has arbitrary size
     -- ! and the numbers we're testing are positive and less than 1e6
-    palindrome2 n = ap (==) (dropWhile not . reverse) $ toListOf bits (fromIntegral n :: Word32)
+    palindrome2 n = (\xs -> let xs' = reverse . dropWhile not $ reverse xs in xs' == reverse xs') $ toListOf bits (fromIntegral n :: Word32)
 
 q037 :: Integer
 {-
@@ -614,7 +616,9 @@ q038 :: Integer
     What is the largest 1 to 9 pandigital 9-digit number that can be formed as the
     concatenated product of an integer with (1, 2, ..., n) where n > 1?
 -}
-q038 = head . filter (\x -> pandigital1 x && any (\n -> all ((== 0) . (x `mod`)) [1 .. n]) [2..9]) $ reverse [100000000..987654321]
+q038 = maximum . filter pandigital1 $ map catProd [1..10000] where
+    catProd :: Integer -> Integer
+    catProd n = undigits . take 9 $ concatMap (digits . (n*)) [1..9]
 
 q039 :: Integer
 {-
@@ -648,7 +652,7 @@ q041 :: Integer
     For example, 2143 is a 4-digit pandigital and is also prime.
     What is the largest n-digit pandigital prime that exists?
 -}
-q041 = last . filter pandigital1 . takeWhile (< 10000000) $ primes
+q041 = maximum . filter isPrime $ pandigitals1 7
 -- ! cannot have 8 or 9 digits as (sum [1..8]) and (sum [1..9]) are divisible by 3
 
 q042 :: Integer
@@ -683,7 +687,7 @@ q043 :: Integer
     --?     d(8)d(9)d(10) = 289 is divisible by 17
     Find the sum of all 0 to 9 pandigital numbers with this property.
 -}
-q043 = sum . filter (and . (map test [1..7] <*>) . pure) . map undigits . filter ((/=0) . head) $ permutations [0..9] where
+q043 = sum . filter (and . (map test [1..7] <*>) . pure) $ pandigitals0 9 where
     test :: Integer -> Integer -> Bool
     test k n = (==0) . (`mod` head (genericDrop (k-1) primes)) . undigits . genericTake 3 . genericDrop k $ digits n
 
@@ -934,10 +938,9 @@ q055 = fromIntegral $ count lychrel [1..10000] where
 
 q056 :: Integer
 {-
-    A googol (10^100) is a massive number: one followed by one-hundred zeros;
-    100^100 is almost unimaginably large: one followed by two-hundred zeros.
+    A googol (10^100) is a massive number: one followed by one-hundred zeros; 100^100 is almost unimaginably large: one followed by two-hundred zeros.
     Despite their size, the sum of the digits in each number is only 1.
-    Considering natural numbers of the form, ab, where a, b < 100, what is the maximum digital sum?
+    Considering natural numbers of the form a^b, where a, b < 100, what is the maximum digital sum?
 -}
 q056 = maximum [ sum $ digits (a^b) | a <- [1..99], b <- [1..99] ]
 
@@ -950,17 +953,13 @@ q057 :: Integer
     --?     1 + 1/(2 + 1/2) = 7/5 = 1.4
     --?     1 + 1/(2 + 1/(2 + 1/2)) = 17/12 = 1.41666...
     --?     1 + 1/(2 + 1/(2 + 1/(2 + 1/2))) = 41/29 = 1.41379...
-    The next three expansions are 99/70, 239/169, and 577/408, but the eighth expansion,
-    1393985, is the first example where the number of digits in the numerator exceeds
-    the number of digits in the denominator. In the first one-thousand expansions,
-    how many fractions contain a numerator with more digits than the denominator?
+    The next three expansions are 99/70, 239/169, and 577/408, but the eighth expansion, 1393985, is the first example where the number of digits in the numerator exceeds the number of digits in the denominator. In the first one-thousand expansions, how many fractions contain a numerator with more digits than the denominator?
 -}
 q057 = count (\rat -> length (digits $ numerator rat) > length (digits $ denominator rat)) . take 1000 . drop 1 $ continuedFraction 1 1 (repeat 2)
 
 q058 :: Integer
 {-
-    Starting with 1 and spiralling anticlockwise in the following way,
-    a square spiral with side length 7 is formed.
+    Starting with 1 and spiralling anticlockwise in the following way, a square spiral with side length 7 is formed.
     --?     (37) 36  35  34  33  32 (31)
     --?      38 (17) 16  15  14 (13) 30
     --?      39  18  (5)  4  (3) 12  29
@@ -968,12 +967,8 @@ q058 :: Integer
     --?      41  20  (7)  8   9  10  27
     --?      42  21  22  23  24  25  26
     --?     (43) 44  45  46  47  48  49
-    It is interesting to note that the odd squares lie along the bottom right diagonal,
-    but what is more interesting is that 8 out of the 13 numbers lying along
-    both diagonals are prime; that is, a ratio of --? 8/13 ~= 62%.
-    If one complete new layer is wrapped around the spiral above, a square spiral with
-    side length 9 will be formed. If this process is continued, what is the side length
-    of the square spiral for which the ratio of primes along both diagonals first falls below 10%?
+    It is interesting to note that the odd squares lie along the bottom right diagonal, but what is more interesting is that 8 out of the 13 numbers lying along both diagonals are prime; that is, a ratio of --? 8/13 ~= 62%.
+    If one complete new layer is wrapped around the spiral above, a square spiral with side length 9 will be formed. If this process is continued, what is the side length of the square spiral for which the ratio of primes along both diagonals first falls below 10%?
 -}
 q058 = primeRatioSideLength 0 1 . tail $ spiralDiagonals 30001 where
     primeRatioSideLength :: Integer -> Integer -> [Integer] -> Integer
@@ -984,26 +979,13 @@ q058 = primeRatioSideLength 0 1 . tail $ spiralDiagonals 30001 where
 
 q059 :: Integer
 {-
-    Each character on a computer is assigned a unique code and the preferred standard is
-    ASCII (American Standard Code for Information Interchange). For example,
+    Each character on a computer is assigned a unique code and the preferred standard is ASCII (American Standard Code for Information Interchange). For example,
     --?     uppercase A = 65, asterisk (*) = 42, and lowercase k = 107.
-    A modern encryption method is to take a text file, convert the bytes to ASCII,
-    then XOR each byte with a given value, taken from a secret key.
-    The advantage with the XOR function is that using the same encryption key
-    on the cipher text, restores the plain text; for example,
+    A modern encryption method is to take a text file, convert the bytes to ASCII, then XOR each byte with a given value, taken from a secret key. The advantage with the XOR function is that using the same encryption key on the cipher text, restores the plain text; for example,
     --?     65 XOR 42 = 107, then 107 XOR 42 = 65.
-    For unbreakable encryption, the key is the same length as the plain text message,
-    and the key is made up of random bytes. The user would keep the encrypted message
-    and the encryption key in different locations, and without both "halves",
-    it is impossible to decrypt the message. Unfortunately, this method is impractical
-    for most users, so the modified method is to use a password as a key.
-    If the password is shorter than the message, which is likely, the key is repeated
-    cyclically throughout the message. The balance for this method is using a sufficiently
-    long password key for security, but short enough to be memorable.
-    Your task has been made easy, as the encryption key consists of three lower case characters.
-    Using "./Inputs/059.txt", a file containing the encrypted ASCII codes,
-    and the knowledge that the plain text must contain common English words,
-    decrypt the message and find the sum of the ASCII values in the original text.
+    For unbreakable encryption, the key is the same length as the plain text message, and the key is made up of random bytes. The user would keep the encrypted message and the encryption key in different locations, and without both "halves", it is impossible to decrypt the message. Unfortunately, this method is impractical for most users, so the modified method is to use a password as a key.
+    If the password is shorter than the message, which is likely, the key is repeated cyclically throughout the message. The balance for this method is using a sufficiently long password key for security, but short enough to be memorable.
+    Your task has been made easy, as the encryption key consists of three lower case characters. Using "./Inputs/059.txt", a file containing the encrypted ASCII codes, and the knowledge that the plain text must contain common English words, decrypt the message and find the sum of the ASCII values in the original text.
 -}
 q059 = fromIntegral . sum . map ord . head . filter (" the " `isInfixOf`) $ map (map (chr . fromIntegral) . zipWith xor in059 . cycle) threeLetters where
     in059 :: [Integer]
@@ -1014,9 +996,7 @@ q059 = fromIntegral . sum . map ord . head . filter (" the " `isInfixOf`) $ map 
 
 q060 :: Integer
 {-
-    The primes 3, 7, 109, and 673, are quite remarkable. By taking any two primes and concatenating them
-    in any order the result will always be prime. For example, taking 7 and 109, both 7109 and 1097 are prime.
-    The sum of these four primes, 792, represents the lowest sum for a set of four primes with this property.
+    The primes 3, 7, 109, and 673, are quite remarkable. By taking any two primes and concatenating them in any order the result will always be prime. For example, taking 7 and 109, both 7109 and 1097 are prime. The sum of these four primes, 792, represents the lowest sum for a set of four primes with this property.
     Find the lowest sum for a set of five primes for which any two primes concatenate to produce another prime.
 -}
 q060 = sum $ minimumOn sum fiveConcatenablePrimes where
@@ -1045,8 +1025,7 @@ q060 = sum $ minimumOn sum fiveConcatenablePrimes where
 
 q061 :: Integer
 {-
-    Triangle, square, pentagonal, hexagonal, heptagonal, and octagonal numbers are all
-    figurate (polygonal) numbers and are generated by the following formulae:
+    Triangle, square, pentagonal, hexagonal, heptagonal, and octagonal numbers are all figurate (polygonal) numbers and are generated by the following formulae:
     --?     Triangle       P(3,n) = n(n+1)/2      1, 3,  6, 10, 15, ...
     --?     Square         P(4,n) = n²            1, 4,  9, 16, 25, ...
     --?     Pentagonal     P(5,n) = n(3n−1)/2     1, 5, 12, 22, 35, ...
@@ -1054,13 +1033,10 @@ q061 :: Integer
     --?     Heptagonal     P(7,n) = n(5n−3)/2     1, 7, 18, 34, 55, ...
     --?    Octagonal      P(8,n) = n(3n−2)       1, 8, 21, 40, 65, ...
     The ordered set of three 4-digit numbers: 8128, 2882, 8281, has three interesting properties.
-        (1) The set is cyclic, in that the last two digits of each number is
-            the first two digits of the next number (including the last number with the first).
-        (2) Each polygonal type: triangle (P(3,127) = 8128), square (P(4,91) = 8281),
-            and pentagonal (P5,44=2882), is represented by a different number in the set.
+        (1) The set is cyclic, in that the last two digits of each number is the first two digits of the next number (including the last number with the first).
+        (2) Each polygonal type: triangle (P(3,127) = 8128), square (P(4,91) = 8281), and pentagonal (P5,44=2882), is represented by a different number in the set.
         (3) This is the only set of 4-digit numbers with this property.
-    Find the sum of the only ordered set of six cyclic 4-digit numbers for which each polygonal type:
-    triangle, square, pentagonal, hexagonal, heptagonal, and octagonal, is represented by a different number in the set.
+    Find the sum of the only ordered set of six cyclic 4-digit numbers for which each polygonal type: triangle, square, pentagonal, hexagonal, heptagonal, and octagonal, is represented by a different number in the set.
 -}
 q061 = sum . head . head $ filter (any (\xs -> isCycle (head xs) (tail xs))) searchSpace where
     searchSpace :: [[[Integer]]]
@@ -1092,6 +1068,39 @@ q061 = sum . head . head $ filter (any (\xs -> isCycle (head xs) (tail xs))) sea
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+q709 :: Integer
+{-
+    Every day for the past n days Even Stevens brings home his groceries in a plastic bag. He stores these plastic bags in a cupboard. He either puts the plastic bag into the cupboard with the rest, or else he takes an even number of the existing bags (which may either be empty or previously filled with other bags themselves) and places these into the current bag. After 4 days there are 5 possible packings and if the bags are numbered 1 (oldest), 2, 3, 4, they are:
+    --? Four empty bags,
+    --? 1 and 2 inside 3, 4 empty,
+    --? 1 and 3 inside 4, 2 empty,
+    --? 1 and 2 inside 4, 3 empty,
+    --? 2 and 3 inside 4, 1 empty.
+    Note that 1, 2, 3 inside 4 is invalid because every bag must contain an even number of bags.
+    Define f(n) to be the number of possible packings of n bags. Hence f(4)=5. You are also given f(8)=1385.
+    Find f(24680) giving your answer modulo 1020202009.
+-}
+q709 = a000111 24680 where
+    a000111 :: Integer -> Integer
+    a000111 n = case viewr (a008281 $ n + 1) of
+        EmptyR -> 0
+        _ :> a -> case viewr a of
+            EmptyR -> 0
+            _ :> b -> b `mod` 1020202009
+
+    a008281 :: Integer -> Seq (Seq Integer)
+    a008281 n = Seq.iterateN (fromInteger n) (Seq.scanl (+) 0 . Seq.reverse) (Seq.singleton 1)
 
 
 
@@ -1798,4 +1807,13 @@ q = \case
     -- 698 -> q698
     -- 699 -> q699
     -- 700 -> q700
+    -- 701 -> q701
+    -- 702 -> q702
+    -- 703 -> q703
+    -- 704 -> q704
+    -- 705 -> q705
+    -- 706 -> q706
+    -- 707 -> q707
+    -- 708 -> q708
+    709 -> q709
     x   -> error "that's it so far"

@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: a1ba8df23ea01dd96d2136e7b27cc706330ed7714a6dd2feb8e22f9be3ca0c40
+-- hash: c39fecea6fe59de488d7cb74f6b6fce6e0f23a6953294a13fbd498b3243295e9
 
 name:           project-euler
 version:        0.1.0.0
@@ -32,14 +32,19 @@ library
       Poker
       Polynomials
       Questions
+      Sev09
+      Sev20
+      Sevenfifteen
+      Sevenfourteen
   other-modules:
       Paths_project_euler
   hs-source-dirs:
       src
-  default-extensions: LambdaCase MultiWayIf TupleSections NamedFieldPuns BangPatterns ViewPatterns TypeOperators KindSignatures InstanceSigs OverloadedStrings EmptyCase GeneralizedNewtypeDeriving DeriveFoldable DeriveFunctor DeriveGeneric DeriveLift DeriveTraversable
+  default-extensions: LambdaCase MultiWayIf TupleSections RecordWildCards BangPatterns ViewPatterns TypeOperators KindSignatures InstanceSigs OverloadedStrings EmptyCase GeneralizedNewtypeDeriving DeriveFoldable DeriveFunctor DeriveGeneric DeriveLift DeriveTraversable
   build-depends:
       arithmoi >=0.10 && <0.11
     , array >=0.5.4 && <0.6
+    , async
     , base >=4.7 && <5
     , combinat >=0.2.9 && <0.3
     , containers >=0.6.2 && <0.7
@@ -50,6 +55,7 @@ library
     , ghc >=8.8.2 && <8.9
     , lens >=4.19 && <4.20
     , primes >=0.2 && <0.3
+    , time
   default-language: Haskell2010
 
 executable project-euler-exe
@@ -58,11 +64,12 @@ executable project-euler-exe
       Paths_project_euler
   hs-source-dirs:
       app
-  default-extensions: LambdaCase MultiWayIf TupleSections NamedFieldPuns BangPatterns ViewPatterns TypeOperators KindSignatures InstanceSigs OverloadedStrings EmptyCase GeneralizedNewtypeDeriving DeriveFoldable DeriveFunctor DeriveGeneric DeriveLift DeriveTraversable
+  default-extensions: LambdaCase MultiWayIf TupleSections RecordWildCards BangPatterns ViewPatterns TypeOperators KindSignatures InstanceSigs OverloadedStrings EmptyCase GeneralizedNewtypeDeriving DeriveFoldable DeriveFunctor DeriveGeneric DeriveLift DeriveTraversable
   ghc-options: -threaded -rtsopts -with-rtsopts=-N -O2
   build-depends:
       arithmoi >=0.10 && <0.11
     , array >=0.5.4 && <0.6
+    , async
     , base >=4.7 && <5
     , combinat >=0.2.9 && <0.3
     , containers >=0.6.2 && <0.7
@@ -74,4 +81,5 @@ executable project-euler-exe
     , lens >=4.19 && <4.20
     , primes >=0.2 && <0.3
     , project-euler
+    , time
   default-language: Haskell2010

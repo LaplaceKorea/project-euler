@@ -1,56 +1,41 @@
 module NumbersExtra
-    ( module Control.Monad
+    ( module Control.Arrow
+    , module Control.Monad
     , module Data.List.Extra
     , module Data.Ratio
     , module Math.Combinat.Partitions.Integer
     , module Polynomials
     , count
-    , isPrime
-    , primes
-    , primeFactors
-    , distinctPrimeFactors
-    , ngons
-    , triangles
-    , squares
-    , pentagons
-    , hexagons
-    , heptagons
-    , octagons
+    , sumOn, productOn
+    , isPrime, primes, primeFactors, primeFactorPairs, distinctPrimeFactors
+    , ngons, triangles, squares, pentagons, hexagons, heptagons, octagons
       -- , ngonal, triangular, quadrilateral, pentagonal, hexagonal, heptagonal, octagonal
-    , fibonaccis
-    , fibonacciSequence
-    , digits
-    , undigits
-    , backward
+    , fibonaccis, fibonacciSequence
+    , digits, undigits, backward
     , palindrome
-    , pandigital0
-    , pandigital1
-    , divisors
-    , numDivisors
-    , properDivisors
-    , amicable
-    , deficient
-    , perfect
-    , abundant
+    , pandigital0, pandigital1, pandigitals0, pandigitals1
+    , divisors, numDivisors, properDivisors, totient
+    , amicable, deficient, perfect, abundant
     , pythags
     , collatz
-    , factorial
-    , choose
+    , factorial, choose
     , reciprocal
     , continuedFraction
     , spiralDiagonals
     , narcissistic
     , repunit
+    , stirling1, stirling2
     )
 where
 
+import           Control.Arrow
 import           Control.Monad
 import           Data.List.Extra
 import qualified Data.Numbers.Primes as P
 import           Data.Ratio
 import           Math.Combinat.Partitions.Integer
-import           Math.Combinatorics.Exact.Binomial
-import           Math.Combinatorics.Exact.Factorial
+import qualified Math.Combinatorics.Exact.Binomial  as B
+import qualified Math.Combinatorics.Exact.Factorial as F
 import           Math.NumberTheory.Primes.Testing (isPrime)
 import           Polynomials
 import qualified Util
@@ -59,11 +44,18 @@ import qualified Util
 count :: (Integral b) => (a -> Bool) -> [a] -> b
 count = (fromIntegral .) . Util.count
 
+sumOn, productOn :: (Num b) => (a -> b) -> [a] -> b
+sumOn f = foldl' (\acc x -> acc + f x) 0
+productOn f = foldl' (\acc x -> acc * f x) 1
+
 primes :: [Integer]
 primes = P.primes :: [Integer]
 
 primeFactors :: Integer -> [Integer]
 primeFactors = P.primeFactors
+
+primeFactorPairs :: Integer -> [(Integer, Integer)]
+primeFactorPairs = map (head &&& genericLength) . group . primeFactors
 
 distinctPrimeFactors :: Integer -> [Integer]
 distinctPrimeFactors = nubOrd . primeFactors
@@ -120,6 +112,20 @@ pandigital1 :: Integer -> Bool
 pandigital1 n =
     let k = genericLength (digits n) in null ([1 .. k] \\ digits n)
 
+-- | Find all 0-n pandigital numbers.
+pandigitals0 :: Integer -> [Integer]
+pandigitals0 n
+    | n > 9     = error "not a digit"
+    | n < 1     = error "invalid number"
+    | otherwise = filter pandigital0 . map undigits $ permutations [0..n]
+
+-- | Find all 1-n pandigital numbers.
+pandigitals1 :: Integer -> [Integer]
+pandigitals1 n
+    | n > 9     = error "not a digit"
+    | n < 1     = error "invalid number"
+    | otherwise = map undigits $ permutations [1..n]
+
 -- | Find all the divisors of a number.
 divisors :: Integer -> [Integer]
 divisors n =
@@ -135,6 +141,10 @@ properDivisors n = divisors n \\ [n]
 -- | Find the number of divisors of a number, including itself.
 numDivisors :: Integer -> Integer
 numDivisors = genericLength . divisors
+
+-- | Euler's totient function.
+totient :: Integer -> Integer
+totient n = genericLength [ k | k <- [1..n], gcd n k == 1 ]
 
 -- | Amicable numbers *n* are not equal to their proper divisor sum, *d(n)*, but have the property *d(d(n)) = n*.
 amicable :: Integer -> Bool
@@ -167,6 +177,12 @@ collatz :: Integer -> [Integer]
 collatz n | even n    = n : collatz (n `div` 2)
           | n == 1    = [n]
           | otherwise = n : collatz (3 * n + 1)
+
+factorial :: Integer -> Integer
+factorial = F.factorial . fromIntegral
+
+choose :: Integer -> Integer -> Integer
+choose n k = B.choose (fromIntegral n) (fromIntegral k)
 
 -- | List the decimal expansion of the reciprocal of the number. Finite if and only if the expansion terminates.
 reciprocal :: Integer -> [Integer]
@@ -204,3 +220,10 @@ narcissistic k n = (== n) . sum . map (^ k) $ digits n
 -- | `repunit k` integer formed by repeating the digit 1 `k` times.
 repunit :: Integer -> Integer
 repunit = undigits . flip genericReplicate 1
+
+stirling1, stirling2 :: Integer -> Integer -> Integer
+stirling1 0 0 = 1
+stirling1 _ 0 = 0
+stirling1 0 _ = 0
+stirling1 n k = (n-1) * stirling1 (n-1) k + stirling1 (n-1) (k-1)
+stirling2 n k = (`div` factorial k) $ sum [ (if odd (k - j) then negate else id) $ choose k j * j^n | j <- [0..k] ]
