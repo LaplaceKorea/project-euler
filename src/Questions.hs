@@ -8,8 +8,10 @@ import           Data.Bits
 import           Data.Bits.Lens
 import           Data.Char
 import           Data.Foldable
-import qualified Data.Map as M
-import           Data.Map (Map)
+import qualified Data.Map.Strict as M
+import           Data.Map.Strict (Map, (!?))
+import           Data.Maybe
+import           Data.Ord
 import qualified Data.Set as S
 import           Data.Set (Set)
 import           Data.Sequence (Seq, ViewR(..), viewr)
@@ -521,18 +523,18 @@ q032 :: Integer
     can be written as a 1 through 9 pandigital.
     HINT: Some products can be obtained in more than one way so be sure to only include it once in your sum.
 -}
-q032 = sum . nub . filter (or . ([onefourfour, twothreefour] <*>) . pure) $ pandigitals1 9 where
-    onefourfour :: Integer -> Bool
-    onefourfour (digits -> xs) = let x1 = head xs
-                                     x2 = undigits . take 4 $ tail xs
-                                     x3 = undigits $ drop 5 xs
-                                 in  x1 * x2 == x3
+q032 = sum . nub . map (liftM2 max onefourfour twothreefour) $ pandigitals1 9 where
+    onefourfour :: Integer -> Integer
+    onefourfour (digits -> [a,b,c,d,e,f,g,h,i]) =
+        if   a * undigits [b,c,d,e] == undigits [f,g,h,i]
+        then undigits [f,g,h,i]
+        else 0
 
-    twothreefour :: Integer -> Bool
-    twothreefour (digits -> xs) = let x1 = undigits $ take 2 xs
-                                      x2 = undigits . take 3 $ drop 2 xs
-                                      x3 = undigits $ drop 5 xs
-                                  in  x1 * x2 == x3
+    twothreefour :: Integer -> Integer
+    twothreefour (digits -> [a,b,c,d,e,f,g,h,i]) =
+        if   undigits [a,b] * undigits [c,d,e] == undigits [f,g,h,i]
+        then undigits [f,g,h,i]
+        else 0
 
 q033 :: Integer
 {-
@@ -544,7 +546,14 @@ q033 :: Integer
     and containing two digits in the numerator and denominator. If the product of these
     four fractions is given in its lowest common terms, find the value of the denominator.
 -}
-q033 = fromIntegral (minBound :: Int)
+q033 = denominator . product . map (uncurry (%)) $ filter (uncurry curious) [ (a, b) | a <- [10..99], b <- [10..99] ] where
+    curious :: Integer -> Integer -> Bool
+    curious n d
+        | n < d && 0 `notElem` digits n ++ digits d =
+            case digits n `intersect` digits d of
+                [x] -> n % d == head (digits n \\ [x]) % head (digits d \\ [x])
+                _   -> False
+        | otherwise = False
 
 q034 :: Integer
 {-
@@ -1038,24 +1047,63 @@ q061 :: Integer
         (3) This is the only set of 4-digit numbers with this property.
     Find the sum of the only ordered set of six cyclic 4-digit numbers for which each polygonal type: triangle, square, pentagonal, hexagonal, heptagonal, and octagonal, is represented by a different number in the set.
 -}
-q061 = sum . head . head $ filter (any (\xs -> isCycle (head xs) (tail xs))) searchSpace where
-    searchSpace :: [[[Integer]]]
-    searchSpace = [ combinations [a,b,c,d,e,f]
-                  | a <- validNgons 3, b <- validNgons 4, b /= a, c <- validNgons 5, c `notElem` [a,b]
-                  , d <- validNgons 6, d `notElem` [a,b,c], e <- validNgons 7, e `notElem` [a,b,c,d], f <- validNgons 8, f `notElem` [a,b,c,d,e]
-                  ]
+q061 = sum . head . nubSort . filter cyclic . map (map snd) . concatMap ((`picks` searchSpace) . pure) $ M.keys searchSpace where
+    match :: Integer -> Integer -> Bool
+    match n m = drop 2 (digits n) == take 2 (digits m)
 
-    validNgons :: Integer -> [Integer]
-    validNgons = filter ((/=0) . (!! 2) . digits) . takeWhile ((<5) . length . digits) . dropWhile ((<4) . length . digits) . ngons
+    fourDigitNgons :: Integer -> [Integer]
+    fourDigitNgons = takeWhile (<=10000) . dropWhile (<1000) . ngons
 
-    combinations :: (Eq a) => [a] -> [[a]]
-    combinations []     = [[]]
-    combinations (x:xs) = map (x :) $ permutations xs
+    matches :: (Integer, Integer) -> Map (Integer, Integer) [(Integer, Integer)]
+    matches (k, val)
+        | k `elem` [3..8] = M.singleton (k, val) . concatMap (filter (match val . snd) . (\n -> map (n,) $ fourDigitNgons n)) $ delete k [3..8]
+        | otherwise = M.empty
 
-    isCycle :: Integer -> [Integer] -> Bool
-    isCycle x []  = False
-    isCycle x [y] = drop 2 (digits y) == take 2 (digits x)
-    isCycle x (z:y:xs) = drop 2 (digits z) == take 2 (digits y) && isCycle x (y:xs)
+    cyclic :: [Integer] -> Bool
+    cyclic xs = length xs == 6 && any (pairwiseSequential match) (permutations xs)
+
+    searchSpace :: Map (Integer, Integer) [(Integer, Integer)]
+    searchSpace = runIdentity . M.traverseMaybeWithKey (\k vs -> Identity
+        $ if 0 `elem` digits (snd k) || null vs
+        then Nothing
+        else let vs' = filter ((/=0) . (!! 2) . digits . snd) vs
+            in  if null vs' then Nothing else Just vs') . M.unions $ concatMap (\n -> map (matches . (n,)) (fourDigitNgons n)) [3..8]
+
+    picks :: [(Integer, Integer)] -> Map (Integer, Integer) [(Integer, Integer)] -> [[(Integer, Integer)]]
+    picks [] _ = []
+    picks xs@(x:_) m | length xs == 6 = [xs]
+    picks xs@(x:_) m =
+        let vs = filter ((`notElem` map fst xs) . fst) . fromMaybe [] $ m !? x
+        in  concatMap ((`picks` m) . (:xs)) vs
+
+q062 :: Integer
+{-
+    The cube, 41063625 (345^3), can be permuted to produce two other cubes: 56623104 (384^3) and 66430125 (405^3). In fact, 41063625 is the smallest cube which has exactly three permutations of its digits which are also cube.
+    Find the smallest cube for which exactly five permutations of its digits are cube.
+-}
+q062 = (^3) . fst . minimumOn fst . M.elems $ M.filter ((==5) . snd) cubesByLargestPerm where
+    biggestCubePerm :: Integer -> Integer
+    biggestCubePerm = undigits . sortOn Down . digits . (^3)
+
+    cubesByLargestPerm :: Map Integer (Integer, Integer)
+    cubesByLargestPerm = foldl' (\m (k, v) -> M.insertWith (const $ second succ) k v m) M.empty [ (biggestCubePerm n, (n, 1)) | n <- [345..10000] ]
+
+q063 :: Integer
+{-
+    The 5-digit number, 16807 = 7^5, is also a fifth power. Similarly, the 9-digit number, 134217728 = 8^9, is a ninth power.
+    How many n-digit positive integers exist which are also an nth power?
+-}
+q063 = count (\(a, b) -> genericLength (digits $ a^b) == b) $ (,) <$> [1..9] <*> [1..21]
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1101,6 +1149,9 @@ q709 = a000111 24680 where
 
     a008281 :: Integer -> Seq (Seq Integer)
     a008281 n = Seq.iterateN (fromInteger n) (Seq.scanl (+) 0 . Seq.reverse) (Seq.singleton 1)
+
+
+
 
 
 
@@ -1168,8 +1219,8 @@ q = \case
     59  -> q059
     60  -> q060
     61  -> q061
-    -- 62  -> q062
-    -- 63  -> q063
+    62  -> q062
+    63  -> q063
     -- 64  -> q064
     -- 65  -> q065
     -- 66  -> q066

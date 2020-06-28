@@ -11,7 +11,7 @@ arithmeticProgression (x:y:xs) = arithmeticProgression' (y - x) (y:xs) where
 arithmeticProgression _ = True
 
 avoiding :: Integer -> [Integer] -> Bool
-avoiding k = not . any arithmeticProgression . filter ((==k) . length) . subsequences
+avoiding k = not . any arithmeticProgression . filter ((==k) . genericLength) . subsequences
 
 s :: Integer -> Maybe Integer
 s = fmap (fromIntegral . succ) . findIndex (avoiding 3) . sort . permutations . enumFromTo 1

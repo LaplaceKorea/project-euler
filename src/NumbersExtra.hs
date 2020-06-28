@@ -25,6 +25,8 @@ module NumbersExtra
     , narcissistic
     , repunit
     , stirling1, stirling2
+    , sequentialPairs
+    , pairwiseSequential
     )
 where
 
@@ -38,7 +40,7 @@ import qualified Math.Combinatorics.Exact.Binomial  as B
 import qualified Math.Combinatorics.Exact.Factorial as F
 import           Math.NumberTheory.Primes.Testing (isPrime)
 import           Polynomials
-import qualified Util
+import qualified Util (count)
 
 -- | count b xs == genericLength (filter b xs)
 count :: (Integral b) => (a -> Bool) -> [a] -> b
@@ -64,7 +66,7 @@ distinctPrimeFactors = nubOrd . primeFactors
 ngons :: Integer -> [Integer]
 ngons s = ngons' s 1 (s - 1) where
     ngons' :: Integer -> Integer -> Integer -> [Integer]
-    ngons' s n m = n : ngons' s (n + m) (m + s - 2)
+    ngons' !s !n !m = n : ngons' s (n + m) (m + s - 2)
 
 triangles :: [Integer]
 triangles = ngons 3
@@ -227,3 +229,15 @@ stirling1 _ 0 = 0
 stirling1 0 _ = 0
 stirling1 n k = (n-1) * stirling1 (n-1) k + stirling1 (n-1) (k-1)
 stirling2 n k = (`div` factorial k) $ sum [ (if odd (k - j) then negate else id) $ choose k j * j^n | j <- [0..k] ]
+
+sequentialPairs :: [a] -> [[a]]
+sequentialPairs (x:xs) = sequentialPairs' x (x:xs) where
+    sequentialPairs' :: a -> [a] -> [[a]]
+    sequentialPairs' _ []  = []
+    sequentialPairs' x [y] = [[y,x]]
+    sequentialPairs' x (z:y:xs) = [z,y] : sequentialPairs' x (y:xs)
+sequentialPairs [] = []
+
+pairwiseSequential :: (a -> a -> Bool) -> [a] -> Bool
+pairwiseSequential f xs | length xs > 1 = all (\[x,y] -> f x y) $ sequentialPairs xs
+pairwiseSequential _ _ = True
