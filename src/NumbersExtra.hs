@@ -20,7 +20,7 @@ module NumbersExtra
     , collatz
     , factorial, choose
     , reciprocal
-    , continuedFraction
+    , continuedFractionSequence
     , spiralDiagonals
     , narcissistic
     , repunit
@@ -195,14 +195,14 @@ reciprocal = reciprocal' 1 where
         | otherwise      = (last . digits) (n `div` x) : reciprocal' (10 * n) x
 
 -- | `continuedFraction outside num dens` produces an infinite list
-continuedFraction :: Integer -> Integer -> [Integer] -> [Rational]
-continuedFraction outside numer denoms = outside % 1 : continuedFraction' outside numer denoms (numer % head denoms) where
-    continuedFraction' :: Integer -> Integer -> [Integer] -> Rational -> [Rational]
-    continuedFraction' outside _     []     frac = [outside % 1 + frac]
-    continuedFraction' outside numer denoms frac =
+continuedFractionSequence :: Integer -> Integer -> [Integer] -> [Rational]
+continuedFractionSequence outside numer denoms = outside % 1 : continuedFractionSequence' outside numer denoms (numer % head denoms) where
+    continuedFractionSequence' :: Integer -> Integer -> [Integer] -> Rational -> [Rational]
+    continuedFractionSequence' outside _     []     frac = [outside % 1 + frac]
+    continuedFractionSequence' outside numer denoms frac =
         let newdenom = fromIntegral (head denoms) + frac
             newfrac  = fromIntegral numer / newdenom
-        in  outside % 1 + newfrac : continuedFraction' outside numer (tail denoms) newfrac
+        in  outside % 1 + newfrac : continuedFractionSequence' outside numer (tail denoms) newfrac
 
 -- | `spiralDiagonals k` lists the numbers appearing on the diagonals of the Ulam spiral of side length `k`, in order from 1.
 spiralDiagonals :: Integer -> [Integer]

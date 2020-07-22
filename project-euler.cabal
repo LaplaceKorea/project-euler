@@ -1,10 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.31.2.
+-- This file has been generated from package.yaml by hpack version 0.33.0.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: c39fecea6fe59de488d7cb74f6b6fce6e0f23a6953294a13fbd498b3243295e9
+-- hash: 5d26f7e9375fbecb0961449d9db5c703f455f37e8a8957e9bbaedb1fa82e2a0d
 
 name:           project-euler
 version:        0.1.0.0
@@ -32,7 +32,6 @@ library
       Poker
       Polynomials
       Questions
-      Sev09
       Sev20
       Sevenfifteen
       Sevenfourteen
@@ -54,6 +53,7 @@ library
     , fitspec >=0.4.7 && <0.5
     , ghc >=8.8.2 && <8.9
     , lens >=4.19 && <4.20
+    , numbers
     , primes >=0.2 && <0.3
     , time
   default-language: Haskell2010
@@ -79,6 +79,7 @@ executable project-euler-exe
     , fitspec >=0.4.7 && <0.5
     , ghc >=8.8.2 && <8.9
     , lens >=4.19 && <4.20
+    , numbers
     , primes >=0.2 && <0.3
     , project-euler
     , time

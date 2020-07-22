@@ -11,6 +11,8 @@ import           Data.Foldable
 import qualified Data.Map.Strict as M
 import           Data.Map.Strict (Map, (!?))
 import           Data.Maybe
+import           Data.Number.BigFloat
+import           Data.Number.Fixed
 import           Data.Ord
 import qualified Data.Set as S
 import           Data.Set (Set)
@@ -20,6 +22,7 @@ import           Data.Word (Word32)
 import           NumbersExtra
 import           Poker
 import           System.IO.Unsafe
+import Debug.Trace
 
 q001 :: Integer
 {-
@@ -964,7 +967,7 @@ q057 :: Integer
     --?     1 + 1/(2 + 1/(2 + 1/(2 + 1/2))) = 41/29 = 1.41379...
     The next three expansions are 99/70, 239/169, and 577/408, but the eighth expansion, 1393985, is the first example where the number of digits in the numerator exceeds the number of digits in the denominator. In the first one-thousand expansions, how many fractions contain a numerator with more digits than the denominator?
 -}
-q057 = count (\rat -> length (digits $ numerator rat) > length (digits $ denominator rat)) . take 1000 . drop 1 $ continuedFraction 1 1 (repeat 2)
+q057 = count (\rat -> length (digits $ numerator rat) > length (digits $ denominator rat)) . take 1000 . drop 1 $ continuedFractionSequence 1 1 (repeat 2)
 
 q058 :: Integer
 {-
@@ -1095,7 +1098,55 @@ q063 :: Integer
 -}
 q063 = count (\(a, b) -> genericLength (digits $ a^b) == b) $ (,) <$> [1..9] <*> [1..21]
 
+q064 :: Integer
+{-
+    All square roots are periodic when written as continued fractions and can be written in the form:
+    --?     √N = a0 + 1 / (a1 + 1 / (a2 + 1 / (a3 + ...)))
+    For example, let us consider √23:
+    --?     √23 = 4 + √23 − 4 = 4 + 1 / (1 / (√23 - 4)) = 4 + 1 / (1 + (√23 - 3) / 7)
+    If we continue we would get the following expansion:
+    --?     √23 = 4 + 1 / (1 + 1 / (3 + 1 / (1 + 1 / (8 + ...))))
+    The process can be summarised as follows:
+        a0=4,123√−4=23√+47=1+23√−37
+        a1=1,723√−3=7(23√+3)14=3+23√−32
+        a2=3,223√−3=2(23√+3)14=1+23√−47
+        a3=1,723√−4=7(23√+4)7=8+23−−√−4
+        a4=8,123√−4=23√+47=1+23√−37
+        a5=1,723√−3=7(23√+3)14=3+23√−32
+        a6=3,223√−3=2(23√+3)14=1+23√−47
+        a7=1,723√−4=7(23√+4)7=8+23−−√−4
+    It can be seen that the sequence is repeating. For conciseness, we use the notation 23−−√=[4;(1,3,1,8)], to indicate that the block (1,3,1,8) repeats indefinitely.
+    The first ten continued fraction representations of (irrational) square roots are:
+        2–√=[1;(2)], period=1
+        3–√=[1;(1,2)], period=2
+        5–√=[2;(4)], period=1
+        6–√=[2;(2,4)], period=2
+        7–√=[2;(1,1,1,4)], period=4
+        8–√=[2;(1,4)], period=2
+        10−−√=[3;(6)], period=1
+        11−−√=[3;(3,6)], period=2
+        12−−√=[3;(2,6)], period=2
+        13−−√=[3;(1,1,1,1,6)], period=5
+    Exactly four continued fractions, for N≤13, have an odd period.
+    How many continued fractions for N≤10000 have an odd period?
+-}
+q064 = count (\n -> odd . findPeriod . take 256 . drop 1 . continuedFraction . sqrt . fromIntegral $ n) [2..10000] where
+findPeriod :: (Eq a) => [a] -> Integer
+findPeriod xs = fst $ findPeriod' 1 (genericLength xs) [] xs
+findPeriod' :: (Eq a) => Integer -> Integer -> [Integer] -> [a] -> (Integer, [Integer])
+findPeriod' n stop ms xs
+    | null xs    = (0, ms)
+    | allSame xs = (1, ms)
+    | n > stop   = (minimum ms, ms)
+    | genericTake n xs == genericTake n (genericDrop n xs) && not (allSame (genericTake n xs))
+                    = findPeriod' (n+1) stop (n : ms) xs
+    | genericTake n xs == genericTake n (genericDrop n xs) && allSame (genericTake n xs) = findPeriod' (n+1) stop (1 : ms) xs
+    | otherwise  = findPeriod' (n+1) stop ms xs
 
+continuedFraction :: BigFloat Prec500 -> [Integer]
+continuedFraction (properFraction -> (whole, part))
+    | part == 0 = [whole]
+    | otherwise = whole : continuedFraction (recip part)
 
 
 
@@ -1149,6 +1200,26 @@ q709 = a000111 24680 where
 
     a008281 :: Integer -> Seq (Seq Integer)
     a008281 n = Seq.iterateN (fromInteger n) (Seq.scanl (+) 0 . Seq.reverse) (Seq.singleton 1)
+
+q721 :: Integer
+{-
+    Given is the function f(a,n) = ⌊(⌈√a⌉+√a)^n⌋.
+    ⌊.⌋ denotes the floor function and ⌈.⌉ denotes the ceiling function.
+    f(5,2) = 27 and f(5,5) = 3935.
+
+    G(n) = \sum_{a = 1}^n f(a,a²).
+    G(1000) mod 999999937 = 163861845.
+    Find G(5000000). Give your answer modulo 999999937.
+-}
+q721 = 0 --g 5000000 `mod` 999999937 where
+f :: Integer -> Integer -> Integer
+f a n = floor $ (fromIntegral (ceiling b) + b) ^^ n
+    where b = sqrt (fromIntegral a) :: BigFloat Prec500
+
+g :: Integer -> Integer
+g n = sumOn (\a -> f a (a^2) `mod` 999999937) [1..n]
+
+
 
 
 
@@ -1221,7 +1292,7 @@ q = \case
     61  -> q061
     62  -> q062
     63  -> q063
-    -- 64  -> q064
+    64  -> q064
     -- 65  -> q065
     -- 66  -> q066
     -- 67  -> q067

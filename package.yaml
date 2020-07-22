@@ -32,6 +32,7 @@ dependencies:
   - fitspec             >= 0.4.7 && < 0.5
   - ghc                 >= 8.8.2 && < 8.9
   - lens                >= 4.19  && < 4.20
+  - numbers
   - primes              >= 0.2   && < 0.3
   - time
 
