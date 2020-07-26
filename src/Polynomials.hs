@@ -53,12 +53,6 @@ zipPoly f x@(Poly xs) y@(Poly ys) = poly $ zipWith f xs' ys' where
     xs' = xs ++ replicate (fromInteger (-d)) def
     ys' = ys ++ replicate (fromInteger d) def
 
-pascal :: Int -> Polynomial Integer
-pascal n = product . replicate n $ poly [1, 1]
-
-choose :: Int -> Int -> Integer
-n `choose` m = toList (pascal n) !! m
-
 polyQuotRem :: (Eq a, Default a, Integral a) => Polynomial a -> Polynomial a -> (Polynomial a, Polynomial a)
 polyQuotRem a@(Poly as) b@(Poly bs)
     | b == def  = error "divide by 0"

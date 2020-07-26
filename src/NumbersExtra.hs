@@ -18,7 +18,7 @@ module NumbersExtra
     , amicable, deficient, perfect, abundant
     , pythags
     , collatz
-    , factorial, choose
+    , factorial, pascal, choose
     , reciprocal
     , continuedFractionSequence
     , spiralDiagonals
@@ -101,6 +101,10 @@ undigits = read . concatMap show
 backward :: (Integral a, Read a, Show a) => a -> a
 backward = undigits . reverse . digits
 
+pairwise :: (a -> a -> a) -> [a] -> [a]
+pairwise f (x:y:xs) = f x y : pairwise f (y:xs)
+pairwise _ xs = xs
+
 palindrome :: (Integral a, Read a, Show a, Eq a) => a -> Bool
 palindrome = ap (==) backward
 
@@ -182,6 +186,14 @@ collatz n | even n    = n : collatz (n `div` 2)
 
 factorial :: Integer -> Integer
 factorial = F.factorial . fromIntegral
+
+pascal :: (Integral a) => Int -> [a]
+pascal = (iterate ((1:) . pairwise (+)) [1] !!)
+
+-- choose :: (Integral a) => a -> a -> a
+-- n `choose` m
+--     | 0 <= m && m <= n = pascal n !! m
+--     | otherwise = 0
 
 choose :: Integer -> Integer -> Integer
 choose n k = B.choose (fromIntegral n) (fromIntegral k)
