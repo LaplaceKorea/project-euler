@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: e50dfb193cd5107b42addfce3cf16a0cf42294a1fdac91e181d66029413cf99b
+-- hash: 3d3662ba553d1a2955e0ec360d9a83b4374a0363cd581ffac1cf7b143f9ed89b
 
 name:           project-euler
 version:        0.1.0.1
@@ -38,20 +38,20 @@ library
       src
   default-extensions: LambdaCase MultiWayIf TupleSections RecordWildCards BangPatterns ViewPatterns TypeOperators KindSignatures InstanceSigs OverloadedStrings EmptyCase GeneralizedNewtypeDeriving DeriveFoldable DeriveFunctor DeriveGeneric DeriveLift DeriveTraversable
   build-depends:
-      arithmoi >=0.10 && <0.11
-    , array >=0.5.4 && <0.6
+      arithmoi
+    , array
     , async
-    , base >=4.7 && <5
-    , combinat >=0.2.9 && <0.3
-    , containers >=0.6.2 && <0.7
-    , data-default-class >=0.1.2 && <0.2
-    , exact-combinatorics >=0.2 && <0.3
-    , extra >=1.6 && <1.7
-    , fitspec >=0.4.7 && <0.5
-    , ghc >=8.8.2 && <8.9
-    , lens >=4.19 && <4.20
+    , base
+    , combinat
+    , containers
+    , data-default-class
+    , exact-combinatorics
+    , extra
+    , fitspec
+    , ghc
+    , lens
     , numbers
-    , primes >=0.2 && <0.3
+    , primes
     , time
   default-language: Haskell2010
 
@@ -64,20 +64,20 @@ executable project-euler-exe
   default-extensions: LambdaCase MultiWayIf TupleSections RecordWildCards BangPatterns ViewPatterns TypeOperators KindSignatures InstanceSigs OverloadedStrings EmptyCase GeneralizedNewtypeDeriving DeriveFoldable DeriveFunctor DeriveGeneric DeriveLift DeriveTraversable
   ghc-options: -threaded -rtsopts -with-rtsopts=-N -O2
   build-depends:
-      arithmoi >=0.10 && <0.11
-    , array >=0.5.4 && <0.6
+      arithmoi
+    , array
     , async
-    , base >=4.7 && <5
-    , combinat >=0.2.9 && <0.3
-    , containers >=0.6.2 && <0.7
-    , data-default-class >=0.1.2 && <0.2
-    , exact-combinatorics >=0.2 && <0.3
-    , extra >=1.6 && <1.7
-    , fitspec >=0.4.7 && <0.5
-    , ghc >=8.8.2 && <8.9
-    , lens >=4.19 && <4.20
+    , base
+    , combinat
+    , containers
+    , data-default-class
+    , exact-combinatorics
+    , extra
+    , fitspec
+    , ghc
+    , lens
     , numbers
-    , primes >=0.2 && <0.3
+    , primes
     , project-euler
     , time
   default-language: Haskell2010

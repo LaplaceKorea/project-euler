@@ -20,20 +20,20 @@ extra-source-files:
 description:         Please see the README on GitHub at <https://github.com/mel-brown/project-euler#readme>
 
 dependencies:
-  - arithmoi            >= 0.10  && < 0.11
-  - array               >= 0.5.4 && < 0.6
+  - arithmoi
+  - array
   - async
-  - base                >= 4.7   && < 5
-  - containers          >= 0.6.2 && < 0.7
-  - combinat            >= 0.2.9 && < 0.3
-  - data-default-class  >= 0.1.2 && < 0.2
-  - exact-combinatorics >= 0.2   && < 0.3
-  - extra               >= 1.6   && < 1.7
-  - fitspec             >= 0.4.7 && < 0.5
-  - ghc                 >= 8.8.2 && < 8.9
-  - lens                >= 4.19  && < 4.20
+  - base
+  - containers
+  - combinat
+  - data-default-class
+  - exact-combinatorics
+  - extra
+  - fitspec
+  - ghc
+  - lens
   - numbers
-  - primes              >= 0.2   && < 0.3
+  - primes
   - time
 
 default-extensions:

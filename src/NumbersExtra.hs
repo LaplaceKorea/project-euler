@@ -243,12 +243,12 @@ stirling1 n k = (n-1) * stirling1 (n-1) k + stirling1 (n-1) (k-1)
 stirling2 n k = (`div` factorial k) $ sum [ (if odd (k - j) then negate else id) $ choose k j * j^n | j <- [0..k] ]
 
 sequentialPairs :: [a] -> [[a]]
+sequentialPairs [] = []
 sequentialPairs (x:xs) = sequentialPairs' x (x:xs) where
     sequentialPairs' :: a -> [a] -> [[a]]
     sequentialPairs' _ []  = []
     sequentialPairs' x [y] = [[y,x]]
     sequentialPairs' x (z:y:xs) = [z,y] : sequentialPairs' x (y:xs)
-sequentialPairs [] = []
 
 pairwiseSequential :: (a -> a -> Bool) -> [a] -> Bool
 pairwiseSequential f xs | length xs > 1 = all (\[x,y] -> f x y) $ sequentialPairs xs
