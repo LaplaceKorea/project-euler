@@ -4,10 +4,10 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 5d26f7e9375fbecb0961449d9db5c703f455f37e8a8957e9bbaedb1fa82e2a0d
+-- hash: e50dfb193cd5107b42addfce3cf16a0cf42294a1fdac91e181d66029413cf99b
 
 name:           project-euler
-version:        0.1.0.0
+version:        0.1.0.1
 description:    Please see the README on GitHub at <https://github.com/mel-brown/project-euler#readme>
 homepage:       https://github.com/mel-brown/project-euler#readme
 bug-reports:    https://github.com/mel-brown/project-euler/issues
@@ -32,9 +32,6 @@ library
       Poker
       Polynomials
       Questions
-      Sev20
-      Sevenfifteen
-      Sevenfourteen
   other-modules:
       Paths_project_euler
   hs-source-dirs:
