@@ -21,7 +21,6 @@ description:         Please see the README on GitHub at <https://github.com/mel-
 
 dependencies:
   - arithmoi
-  - array
   - async
   - base
   - containers
@@ -35,6 +34,7 @@ dependencies:
   - numbers
   - primes
   - time
+  - vector
 
 default-extensions:
   - LambdaCase

@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 3d3662ba553d1a2955e0ec360d9a83b4374a0363cd581ffac1cf7b143f9ed89b
+-- hash: 066dc87e0ec8882cac3915640e2d85ae9076abab950579d290efba8cd5e25c84
 
 name:           project-euler
 version:        0.1.0.1
@@ -39,7 +39,6 @@ library
   default-extensions: LambdaCase MultiWayIf TupleSections RecordWildCards BangPatterns ViewPatterns TypeOperators KindSignatures InstanceSigs OverloadedStrings EmptyCase GeneralizedNewtypeDeriving DeriveFoldable DeriveFunctor DeriveGeneric DeriveLift DeriveTraversable
   build-depends:
       arithmoi
-    , array
     , async
     , base
     , combinat
@@ -53,6 +52,7 @@ library
     , numbers
     , primes
     , time
+    , vector
   default-language: Haskell2010
 
 executable project-euler-exe
@@ -65,7 +65,6 @@ executable project-euler-exe
   ghc-options: -threaded -rtsopts -with-rtsopts=-N -O2
   build-depends:
       arithmoi
-    , array
     , async
     , base
     , combinat
@@ -80,4 +79,5 @@ executable project-euler-exe
     , primes
     , project-euler
     , time
+    , vector
   default-language: Haskell2010

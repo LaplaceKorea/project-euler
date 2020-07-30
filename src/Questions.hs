@@ -1,28 +1,29 @@
 module Questions where
 
 import           CalendarExtra
-import           Control.Arrow
-import           Control.Lens hiding ((:>))
-import           Data.Array
+import           Control.Lens           hiding ((:>))
 import           Data.Bits
 import           Data.Bits.Lens
 import           Data.Char
 import           Data.Foldable
-import qualified Data.Map.Strict as M
-import           Data.Map.Strict (Map, (!?))
+import           Data.Function          (on)
+import qualified Data.Map.Strict        as Map
+import           Data.Map.Strict        (Map, (!?))
 import           Data.Maybe
 import           Data.Number.BigFloat
 import           Data.Number.Fixed
 import           Data.Ord
-import qualified Data.Set as S
-import           Data.Set (Set)
-import           Data.Sequence (Seq, ViewR(..), viewr)
-import qualified Data.Sequence as Seq
-import           Data.Word (Word32)
+import qualified Data.Set               as Set
+import           Data.Set               (Set)
+import           Data.Sequence          (Seq, ViewR(..), viewr)
+import qualified Data.Sequence          as Seq
+import           Data.Tuple.Extra
+import qualified Data.Vector            as Vec
+import           Data.Word              (Word32)
 import           NumbersExtra
 import           Poker
-import           System.IO.Unsafe
-import Debug.Trace
+import           System.IO.Unsafe       (unsafePerformIO)
+import           Debug.Trace
 
 q001 :: Integer
 {-
@@ -30,9 +31,7 @@ q001 :: Integer
     we get 3, 5, 6 and 9. The sum of these multiples is 23.
     Find the sum of all the multiples of 3 or 5 below 1000.
 -}
-q001 = findSum 1000 where
-    findSum :: Integer -> Integer
-    findSum n = sum [ x | x <- [1..n-1], x `mod` 3 == 0 || x `mod` 5 == 0 ]
+q001 = sum [ x | x <- [1..999], x `mod` 3 == 0 || x `mod` 5 == 0 ] where
 
 q002 :: Integer
 {-
@@ -57,7 +56,7 @@ q004 :: Integer
     made from the product of two 2-digit numbers is 9009 = 91 × 99.
     Find the largest palindrome made from the product of two 3-digit numbers.
 -}
-q004 = head . filter palindrome $ (*) <$> [999,998..100] <*> [999,998..100]
+q004 = maximum . filter palindrome $ (*) <$> [999,998..100] <*> [999,998..100]
 
 q005 :: Integer
 {-
@@ -65,7 +64,7 @@ q005 :: Integer
     the numbers from 1 to 10 without any remainder. What is the smallest
     positive number that is evenly divisible by all of the numbers from 1 to 20?
 -}
-q005 = foldr lcm 1 [2..20]
+q005 = foldl' lcm 1 [2..20]
 
 q006 :: Integer
 {-
@@ -120,7 +119,7 @@ q008 = maximum $ products in008 where
                 | otherwise      = product (take 13 xs) : products (tail xs)
 
     in008 :: [Integer]
-    in008 = digits . read . unsafePerformIO $ readFile "./Inputs/008.txt"
+    in008 = digits 7316717653133062491922511967442657474235534919493496983520312774506326239578318016984801869478851843858615607891129494954595017379583319528532088055111254069874715852386305071569329096329522744304355766896648950445244523161731856403098711121722383113622298934233803081353362766142828064444866452387493035890729629049156044077239071381051585930796086670172427121883998797908792274921901699720888093776657273330010533678812202354218097512545405947522435258490771167055601360483958644670632441572215539753697817977846174064955149290862569321978468622482839722413756570560574902614079729686524145351004748216637048440319989000889524345065854122758866688116427171479924442928230863465674813919123162824586178664583591245665294765456828489128831426076900422421902267105562632111110937054421750694165896040807198403850962455444362981230987879927244284909188845801561660979191338754992005240636899125607176060588611646710940507754100225698315520005593572972571636269561882670428252483600823257530420752963450
 
 q009 :: Integer
 {-
@@ -129,7 +128,7 @@ q009 :: Integer
     There exists exactly one Pythagorean triplet for which a + b + c = 1000.
     Find the product abc.
 -}
-q009 = (\(a,b,c) -> a * b * c) . head . filter (\(a,b,c) -> a + b + c == 1000) $ takeWhile (\(_,_,c) -> c < 1000) pythags
+q009 = (\(a,b,c) -> a * b * c) . head . filter (\(a,b,c) -> a + b + c == 1000) $ takeWhile ((<1000) . thd3) pythags
 
 q010 :: Integer
 {-
@@ -169,25 +168,25 @@ q011 = maximum $ [verts, horizs, udiags, ddiags] <*> [grid] where
     in011 = map (map read . words) . lines . unsafePerformIO $ readFile "./Inputs/011.txt"
 
     grid :: Map (Integer, Integer) Integer
-    grid = buildGrid 0 0 in011 M.empty where
+    grid = buildGrid 0 0 in011 Map.empty where
         buildGrid :: Integer -> Integer -> [[Integer]] -> Map (Integer, Integer) Integer -> Map (Integer, Integer) Integer
         buildGrid _ _ []          g = g
         buildGrid r _ ([]:xs)     g = buildGrid (r+1) 0 xs g
-        buildGrid r c ((i:ts):xs) g = buildGrid r (c+1) (ts:xs) $ M.insert (r,c) i g
+        buildGrid r c ((i:ts):xs) g = buildGrid r (c+1) (ts:xs) $ Map.insert (r,c) i g
 
     verts, horizs, udiags, ddiags :: Map (Integer, Integer) Integer -> Integer
-    verts  g = let (r, c)  = fst $ M.findMax g
+    verts  g = let (r, c)  = fst $ Map.findMax g
                    newbase = (,) <$> [0..r] <*> [0..c-3]
-               in  foldr (max . (\(r, c) -> g M.! (r, c) * g M.! (r, c+1) * g M.! (r, c+2) * g M.! (r, c+3))) 0 newbase
-    horizs g = let (r, c)  = fst $ M.findMax g
+               in  foldr (max . (\(r, c) -> g Map.! (r, c) * g Map.! (r, c+1) * g Map.! (r, c+2) * g Map.! (r, c+3))) 0 newbase
+    horizs g = let (r, c)  = fst $ Map.findMax g
                    newbase = (,) <$> [0..r-3] <*> [0..c]
-               in  foldr (max . (\(r, c) -> g M.! (r, c) * g M.! (r+1, c) * g M.! (r+2, c) * g M.! (r+3, c))) 0 newbase
-    udiags g = let (r, c)  = fst $ M.findMax g
+               in  foldr (max . (\(r, c) -> g Map.! (r, c) * g Map.! (r+1, c) * g Map.! (r+2, c) * g Map.! (r+3, c))) 0 newbase
+    udiags g = let (r, c)  = fst $ Map.findMax g
                    newbase = (,) <$> [0..r-3] <*> [3..c]
-               in  foldr (max . (\(r, c) -> g M.! (r, c) * g M.! (r+1, c-1) * g M.! (r+2, c-2) * g M.! (r+3, c-3))) 0 newbase
-    ddiags g = let (r, c)  = fst $ M.findMax g
+               in  foldr (max . (\(r, c) -> g Map.! (r, c) * g Map.! (r+1, c-1) * g Map.! (r+2, c-2) * g Map.! (r+3, c-3))) 0 newbase
+    ddiags g = let (r, c)  = fst $ Map.findMax g
                    newbase = (,) <$> [0..r-3] <*> [0..c-3]
-               in  foldr (max . (\(r, c) -> g M.! (r, c) * g M.! (r+1, c+1) * g M.! (r+2, c+2) * g M.! (r+3, c+3))) 0 newbase
+               in  foldr (max . (\(r, c) -> g Map.! (r, c) * g Map.! (r+1, c+1) * g Map.! (r+2, c+2) * g Map.! (r+3, c+3))) 0 newbase
 
 q012 :: Integer
 {-
@@ -256,39 +255,39 @@ q017 :: Integer
     contains 23 letters and 115 (one hundred and fifteen) contains 20 letters.
     The use of "and" when writing out numbers is in compliance with British usage.
 -}
-q017 = sum $ map (genericLength . concat . words . getWord) [1..1000] where
+q017 = genericLength $ concatMap getWord [1..1000] where
     getWord :: Integer -> String
     getWord n
-        | n ==   0 = ""
-        | n ==   1 = "One"
-        | n ==   2 = "Two"
-        | n ==   3 = "Three"
-        | n ==   4 = "Four"
-        | n ==   5 = "Five"
-        | n ==   6 = "Six"
-        | n ==   7 = "Seven"
-        | n ==   8 = "Eight"
-        | n ==   9 = "Nine"
-        | n ==  10 = "Ten"
-        | n ==  11 = "Eleven"
-        | n ==  12 = "Twelve"
-        | n ==  13 = "Thirteen"
-        | n ==  14 = "Fourteen"
-        | n ==  15 = "Fifteen"
-        | n ==  16 = "Sixteen"
-        | n ==  17 = "Seventeen"
-        | n ==  18 = "Eighteen"
-        | n ==  19 = "Nineteen"
+        | n ==    0 = ""
+        | n ==    1 = "One"
+        | n ==    2 = "Two"
+        | n ==    3 = "Three"
+        | n ==    4 = "Four"
+        | n ==    5 = "Five"
+        | n ==    6 = "Six"
+        | n ==    7 = "Seven"
+        | n ==    8 = "Eight"
+        | n ==    9 = "Nine"
+        | n ==   10 = "Ten"
+        | n ==   11 = "Eleven"
+        | n ==   12 = "Twelve"
+        | n ==   13 = "Thirteen"
+        | n ==   14 = "Fourteen"
+        | n ==   15 = "Fifteen"
+        | n ==   16 = "Sixteen"
+        | n ==   17 = "Seventeen"
+        | n ==   18 = "Eighteen"
+        | n ==   19 = "Nineteen"
         | n == 1000 = "OneThousand"
-        | n >= 100 = getWord (n `div` 100) ++ "Hundred" ++ if (n `mod` 100) /= 0 then "and" ++ getWord (n `mod` 100) else ""
-        | n >=  90 = "Ninety" ++  getWord (n - 90)
-        | n >=  80 = "Eighty" ++  getWord (n - 80)
-        | n >=  70 = "Seventy" ++ getWord (n - 70)
-        | n >=  60 = "Sixty" ++   getWord (n - 60)
-        | n >=  50 = "Fifty" ++   getWord (n - 50)
-        | n >=  40 = "Forty" ++   getWord (n - 40)
-        | n >=  30 = "Thirty" ++  getWord (n - 30)
-        | n >=  20 = "Twenty" ++  getWord (n - 20)
+        | n >=  100 = getWord (n `div` 100) ++ "Hundred" ++ if (n `mod` 100) /= 0 then "and" ++ getWord (n `mod` 100) else ""
+        | n >=   90 = "Ninety"  ++ getWord (n - 90)
+        | n >=   80 = "Eighty"  ++ getWord (n - 80)
+        | n >=   70 = "Seventy" ++ getWord (n - 70)
+        | n >=   60 = "Sixty"   ++ getWord (n - 60)
+        | n >=   50 = "Fifty"   ++ getWord (n - 50)
+        | n >=   40 = "Forty"   ++ getWord (n - 40)
+        | n >=   30 = "Thirty"  ++ getWord (n - 30)
+        | n >=   20 = "Twenty"  ++ getWord (n - 20)
 
 q018 :: Integer
 {-
@@ -326,7 +325,7 @@ q019 :: Integer
         but not on a century unless it is divisible by 400.
     How many Sundays fell on the first of the month during the twentieth century (1 Jan 1901 to 31 Dec 2000)?
 -}
-q019 = genericLength . filter (\d -> weekday d == Sunday && day d == 1) $ concatMap yearCalendar [1901..2000]
+q019 = count ((&&) <$> (==Sunday) . weekday <*> (==1) . day) $ concatMap yearCalendar [1901..2000]
 
 q020 :: Integer
 {-
@@ -378,15 +377,15 @@ q023 :: Integer
     cannot be expressed as the sum of two abundant numbers is less than this limit.
     Find the sum of all the positive integers which cannot be written as the sum of two abundant numbers.
 -}
-q023 = fromIntegral . sum $ filter (not . isAbundSum) [0..limit] where
+q023 = sum . Set.filter (not . isAbundSum) $ Set.fromAscList [0..limit] where
     limit :: Integer
     limit = 28123
 
     abundants :: Set Integer
-    abundants = S.fromAscList $ filter abundant [1..limit]
+    abundants = Set.filter abundant $ Set.fromAscList [1..limit]
 
     isAbundSum :: Integer -> Bool
-    isAbundSum n = any abundant . S.map (n -) $ S.takeWhileAntitone (<= n) abundants
+    isAbundSum n = any abundant . Set.map (n -) $ Set.takeWhileAntitone (<= n) abundants
 
 q024 :: Integer
 {-
@@ -419,7 +418,7 @@ q025 :: Integer
     The 12th term, F(12), is the first term to contain three digits.
     What is the index of the first term in the Fibonacci sequence to contain 1000 digits?
 -}
-q025 = genericLength $ takeWhile ((<1000) . length . digits) fibonaccis
+q025 = maybe 0 fromIntegral $ findIndex ((==1000) . length . digits) fibonaccis
 
 q026 :: Integer
 {-
@@ -526,7 +525,7 @@ q032 :: Integer
     can be written as a 1 through 9 pandigital.
     HINT: Some products can be obtained in more than one way so be sure to only include it once in your sum.
 -}
-q032 = sum . nub . map (liftM2 max onefourfour twothreefour) $ pandigitals1 9 where
+q032 = sum . nub . map (max <$> onefourfour <*> twothreefour) $ pandigitals1 9 where
     onefourfour :: Integer -> Integer
     onefourfour (digits -> [a,b,c,d,e,f,g,h,i]) =
         if   a * undigits [b,c,d,e] == undigits [f,g,h,i]
@@ -564,7 +563,7 @@ q034 :: Integer
     Find the sum of all numbers which are equal to the sum of the factorial of their digits.
     Note: as 1! = 1 and 2! = 2 are not sums they are not included.
 -}
-q034 = sum $ filter (ap (==) (sum . map (factorial . fromIntegral) . digits)) [3..100000]
+q034 = sum $ filter ((==) <*> (sumOn (factorial . fromIntegral) . digits)) [3..100000]
 
 q035 :: Integer
 {-
@@ -574,13 +573,16 @@ q035 :: Integer
     --?     2, 3, 5, 7, 11, 13, 17, 31, 37, 71, 73, 79, and 97.
     How many circular primes are there below one million?
 -}
-q035 = genericLength . filter circularPrime $ takeWhile (< 1000000) primes where
+q035 = count circularPrime $ takeWhile (< 1000000) primes where
     circularPrime :: Integer -> Bool
-    circularPrime = liftM2 (&&) (all isPrime) (not . null) . uncurry take . (length . digits &&& cyclize)
+    circularPrime = ((&&) <$> not . null <*> all isPrime) . uncurry take . (length . digits &&& cyclize)
 
     cyclize :: Integer -> [Integer]
-    cyclize n = let n' = undigits $ tail (digits n) ++ take 1 (digits n)
-                in  if 0 `elem` digits n then [] else n' : cyclize n'
+    cyclize n
+        | 0 `elem` digits n = []
+        | otherwise =
+            let n' = undigits $ tail (digits n) ++ take 1 (digits n)
+            in  n' : cyclize n'
 
 q036 :: Integer
 {-
@@ -588,7 +590,7 @@ q036 :: Integer
     Find the sum of all numbers, less than one million, which are palindromic in base 10 and base 2.
     (Please note that the palindromic number, in either base, may not include leading zeros.)
 -}
-q036 = sum $ filter (liftM2 (&&) palindrome palindrome2) [1..1000000] where
+q036 = sum $ filter ((&&) <$> palindrome <*> palindrome2) [1..1000000] where
     palindrome2 :: Integer -> Bool
     -- ! Convert to a Word32 because Integer has arbitrary size
     -- ! and the numbers we're testing are positive and less than 1e6
@@ -604,7 +606,7 @@ q037 :: Integer
     from left to right and right to left.
     NOTE: 2, 3, 5, and 7 are not considered to be truncatable primes.
 -}
-q037 = sum . filter (liftM2 (&&) truncLeft truncRight) . takeWhile (< 1000000) $ dropWhile (< 10) primes where
+q037 = sum . filter ((&&) <$> truncLeft <*> truncRight) . takeWhile (< 1000000) $ dropWhile (< 10) primes where
     truncLeft :: Integer -> Bool
     truncLeft n
         | n < 10    = isPrime n
@@ -701,7 +703,7 @@ q043 :: Integer
 -}
 q043 = sum . filter (and . (map test [1..7] <*>) . pure) $ pandigitals0 9 where
     test :: Integer -> Integer -> Bool
-    test k n = (==0) . (`mod` head (genericDrop (k-1) primes)) . undigits . genericTake 3 . genericDrop k $ digits n
+    test k n = (primes !! fromIntegral (k-1) `elem`) . primeFactors . undigits . genericTake 3 . genericDrop k $ digits n
 
 q044 :: Integer
 {-
@@ -752,7 +754,7 @@ q046 :: Integer
     It turns out that the conjecture was false.
     What is the smallest odd composite that cannot be written as the sum of a prime and twice a square?
 -}
-q046 = head $ filter (liftM2 (&&) nonGoldbach (not . isPrime)) [3,5..10001] where
+q046 = head $ filter ((&&) <$> nonGoldbach <*> (not . isPrime)) [3,5..10001] where
     nonGoldbach :: Integer -> Bool
     nonGoldbach n = null [ a + 2*b | a <- takeWhile (< n) primes, b <- takeWhile (<= n`div`2) squares, n == a + 2*b ]
 
@@ -854,8 +856,8 @@ q051 = head $ filter (\n -> (>=8) . length . filter isPrime . replaceDigits n $ 
         where
             replaceDigits' :: Integer -> [Integer] -> [Integer] -> [Integer]
             replaceDigits' n ks ls =
-                let n' = array (0, genericLength (digits n) - 1) (zip [0..] $ digits n)
-                in  map (undigits . toList . (n' //)) . groupSortOn snd $ (,) <$> ks <*> ls
+                let n' = Vec.fromList (digits n)
+                in  map (undigits . toList . (n' Vec.//)) . groupSortOn snd $ (,) <$> map fromIntegral ks <*> ls
 
     sixDigitPrimes :: [Integer]
     sixDigitPrimes = takeWhile ((==6) . length . digits) $ dropWhile ((<6) . length . digits) primes
@@ -1050,7 +1052,7 @@ q061 :: Integer
         (3) This is the only set of 4-digit numbers with this property.
     Find the sum of the only ordered set of six cyclic 4-digit numbers for which each polygonal type: triangle, square, pentagonal, hexagonal, heptagonal, and octagonal, is represented by a different number in the set.
 -}
-q061 = sum . head . nubSort . filter cyclic . map (map snd) . concatMap ((`picks` searchSpace) . pure) $ M.keys searchSpace where
+q061 = sum . head . nubSort . filter cyclic . map (map snd) . concatMap ((`picks` searchSpace) . pure) $ Map.keys searchSpace where
     match :: Integer -> Integer -> Bool
     match n m = drop 2 (digits n) == take 2 (digits m)
 
@@ -1059,18 +1061,18 @@ q061 = sum . head . nubSort . filter cyclic . map (map snd) . concatMap ((`picks
 
     matches :: (Integer, Integer) -> Map (Integer, Integer) [(Integer, Integer)]
     matches (k, val)
-        | k `elem` [3..8] = M.singleton (k, val) . concatMap (filter (match val . snd) . (\n -> map (n,) $ fourDigitNgons n)) $ delete k [3..8]
-        | otherwise = M.empty
+        | k `elem` [3..8] = Map.singleton (k, val) . concatMap (filter (match val . snd) . (\n -> map (n,) $ fourDigitNgons n)) $ delete k [3..8]
+        | otherwise = Map.empty
 
     cyclic :: [Integer] -> Bool
     cyclic xs = length xs == 6 && any (pairwiseSequential match) (permutations xs)
 
     searchSpace :: Map (Integer, Integer) [(Integer, Integer)]
-    searchSpace = runIdentity . M.traverseMaybeWithKey (\k vs -> Identity
+    searchSpace = runIdentity . Map.traverseMaybeWithKey (\k vs -> Identity
         $ if 0 `elem` digits (snd k) || null vs
         then Nothing
         else let vs' = filter ((/=0) . (!! 2) . digits . snd) vs
-            in  if null vs' then Nothing else Just vs') . M.unions $ concatMap (\n -> map (matches . (n,)) (fourDigitNgons n)) [3..8]
+            in  if null vs' then Nothing else Just vs') . Map.unions $ concatMap (\n -> map (matches . (n,)) (fourDigitNgons n)) [3..8]
 
     picks :: [(Integer, Integer)] -> Map (Integer, Integer) [(Integer, Integer)] -> [[(Integer, Integer)]]
     picks [] _ = []
@@ -1084,12 +1086,12 @@ q062 :: Integer
     The cube, 41063625 (345^3), can be permuted to produce two other cubes: 56623104 (384^3) and 66430125 (405^3). In fact, 41063625 is the smallest cube which has exactly three permutations of its digits which are also cube.
     Find the smallest cube for which exactly five permutations of its digits are cube.
 -}
-q062 = (^3) . fst . minimumOn fst . M.elems $ M.filter ((==5) . snd) cubesByLargestPerm where
+q062 = (^3) . fst . minimumOn fst . Map.elems $ Map.filter ((==5) . snd) cubesByLargestPerm where
     biggestCubePerm :: Integer -> Integer
     biggestCubePerm = undigits . sortOn Down . digits . (^3)
 
     cubesByLargestPerm :: Map Integer (Integer, Integer)
-    cubesByLargestPerm = foldl' (\m (k, v) -> M.insertWith (const $ second succ) k v m) M.empty [ (biggestCubePerm n, (n, 1)) | n <- [345..10000] ]
+    cubesByLargestPerm = foldl' (\m (k, v) -> Map.insertWith (const $ second succ) k v m) Map.empty [ (biggestCubePerm n, (n, 1)) | n <- [345..10000] ]
 
 q063 :: Integer
 {-
@@ -1130,25 +1132,38 @@ q064 :: Integer
     Exactly four continued fractions, for N≤13, have an odd period.
     How many continued fractions for N≤10000 have an odd period?
 -}
-q064 = count (\n -> odd . findPeriod . take 256 . drop 1 . continuedFraction . sqrt . fromIntegral $ n) [2..10000] where
-findPeriod :: (Eq a) => [a] -> Integer
-findPeriod xs = fst $ findPeriod' 1 (genericLength xs) [] xs
-findPeriod' :: (Eq a) => Integer -> Integer -> [Integer] -> [a] -> (Integer, [Integer])
-findPeriod' n stop ms xs
-    | null xs    = (0, ms)
-    | allSame xs = (1, ms)
-    | n > stop   = (minimum ms, ms)
-    | genericTake n xs == genericTake n (genericDrop n xs) && not (allSame (genericTake n xs))
-                    = findPeriod' (n+1) stop (n : ms) xs
-    | genericTake n xs == genericTake n (genericDrop n xs) && allSame (genericTake n xs) = findPeriod' (n+1) stop (1 : ms) xs
-    | otherwise  = findPeriod' (n+1) stop ms xs
-
-continuedFraction :: BigFloat Prec500 -> [Integer]
-continuedFraction (properFraction -> (whole, part))
-    | part == 0 = [whole]
-    | otherwise = whole : continuedFraction (recip part)
+q064 = count (odd . period) [2..10000] --where
+period :: Integer -> Integer
+period n = period' n (sqrt $ fromIntegral n) (fromIntegral . floor . sqrt $ fromIntegral n) [0] [1]
+period' :: Integer -> Double -> Double -> [Double] -> [Double] -> Integer
+period' n x f p q = if n `elem` squares then 0 else
+    let !s  = sqrt (fromIntegral n)
+        !k  = length p - 1
+        !p' = p ++ [(f * q !! k) - p !! k]
+        !q' = q ++ [ fromIntegral n - (p' !! k+1)^2 / (q !! k) ]
+        !mi = findIndex (\i -> p' !! i == p' !! k && q' !! i == q' !! k) [0..k]
+    in case mi of
+        Just i  -> fromIntegral $ k - i
+        Nothing ->
+            let x = (last p' + s) / last q'
+            in  period' n x (fromIntegral $ floor x) p' q'
 
 
+
+
+q070 :: Integer
+{-
+    Euler's Totient function, φ(n) [sometimes called the phi function], is used to determine the number of positive numbers less than or equal to n which are relatively prime to n. For example, as 1, 2, 4, 5, 7, and 8, are all less than nine and relatively prime to nine,
+        φ(9) = 6.
+    The number 1 is considered to be relatively prime to every positive number, so φ(1) = 1.
+
+    Interestingly, φ(87109) = 79180, and it can be seen that 87109 is a permutation of 79180.
+
+    Find the value of n, 1 < n < 10^7, for which φ(n) is a permutation of n and the ratio n/φ(n) produces a minimum.
+-}
+q070 =
+    let totperms = [ (x, totient x) | x <- [1..10^7], sort (show $ totient x) == sort (show x) ]
+    in  foldl' (\acc (x, t) -> if x < t * acc then x else acc) 999999 totperms
 
 
 
@@ -1298,7 +1313,7 @@ q = \case
     -- 67  -> q067
     -- 68  -> q068
     -- 69  -> q069
-    -- 70  -> q070
+    70  -> q070
     -- 71  -> q071
     -- 72  -> q072
     -- 73  -> q073

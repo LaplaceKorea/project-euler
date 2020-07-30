@@ -1,13 +1,12 @@
 module NumbersExtra
-    ( module Control.Arrow
-    , module Control.Monad
+    ( module Control.Monad
     , module Data.List.Extra
     , module Data.Ratio
     , module Math.Combinat.Partitions.Integer
     , module Polynomials
     , count
     , sumOn, productOn
-    , isPrime, primes, primeFactors, primeFactorPairs, distinctPrimeFactors
+    , isPrime, primes, primeFactors, primePowerDecomposition, distinctPrimeFactors
     , ngons, triangles, squares, pentagons, hexagons, heptagons, octagons
       -- , ngonal, triangular, quadrilateral, pentagonal, hexagonal, heptagonal, octagonal
     , fibonaccis, fibonacciSequence
@@ -56,8 +55,8 @@ primes = P.primes :: [Integer]
 primeFactors :: Integer -> [Integer]
 primeFactors = P.primeFactors
 
-primeFactorPairs :: Integer -> [(Integer, Integer)]
-primeFactorPairs = map (head &&& genericLength) . group . primeFactors
+primePowerDecomposition :: Integer -> [(Integer, Integer)]
+primePowerDecomposition = map (head &&& genericLength) . group . primeFactors
 
 distinctPrimeFactors :: Integer -> [Integer]
 distinctPrimeFactors = nubOrd . primeFactors
@@ -111,19 +110,19 @@ palindrome = ap (==) backward
 -- | Does the number contain each digit from 0 to its length?
 pandigital0 :: Integer -> Bool
 pandigital0 n =
-    let k = genericLength (digits n) in null ([0 .. k] \\ digits n)
+    let k = genericLength (digits n) in ([0..k-1]==) . sort $ digits n
 
 -- | Does the number contain each digit from 1 to its length?
 pandigital1 :: Integer -> Bool
 pandigital1 n =
-    let k = genericLength (digits n) in null ([1 .. k] \\ digits n)
+    let k = genericLength (digits n) in ([1..k]==) . sort $ digits n
 
 -- | Find all 0-n pandigital numbers.
 pandigitals0 :: Integer -> [Integer]
 pandigitals0 n
     | n > 9     = error "not a digit"
     | n < 1     = error "invalid number"
-    | otherwise = filter pandigital0 . map undigits $ permutations [0..n]
+    | otherwise = map undigits . filter ((/=0) . head) $ permutations [0..n]
 
 -- | Find all 1-n pandigital numbers.
 pandigitals1 :: Integer -> [Integer]
@@ -150,7 +149,9 @@ numDivisors = genericLength . divisors
 
 -- | Euler's totient function.
 totient :: Integer -> Integer
-totient n = genericLength [ k | k <- [1..n], gcd n k == 1 ]
+totient n
+    | isPrime n = n - 1
+    | otherwise = foldl' (\acc p -> acc - acc `div` p) n . filter ((==0) . (n `mod`)) $ takeWhile (<=n`div`2) primes
 
 -- | Amicable numbers *n* are not equal to their proper divisor sum, *d(n)*, but have the property *d(d(n)) = n*.
 amicable :: Integer -> Bool
