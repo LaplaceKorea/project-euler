@@ -9,7 +9,7 @@ module NumbersExtra
     , isPrime, primes, primeFactors, primePowerDecomposition, distinctPrimeFactors
     , ngons, triangles, squares, pentagons, hexagons, heptagons, octagons
       -- , ngonal, triangular, quadrilateral, pentagonal, hexagonal, heptagonal, octagonal
-    , fibonaccis, fibonacciSequence
+    , fibonaccis, fibonacciFrom
     , digits, undigits, backward
     , palindrome
     , pandigital0, pandigital1, pandigitals0, pandigitals1
@@ -19,7 +19,7 @@ module NumbersExtra
     , collatz
     , factorial, pascal, choose
     , reciprocal
-    , continuedFractionSequence
+    , cfConvergents, getCF
     , spiralDiagonals
     , narcissistic
     , repunit
@@ -82,11 +82,11 @@ octagons = ngons 8
 
 -- | The traditional Fibonacci sequence with initial terms 0 and 1.
 fibonaccis :: [Integer]
-fibonaccis = fibonacciSequence 0 1
+fibonaccis = fibonacciFrom 0 1
 
--- | `fibonacciSequence n0 n1` generates the Fibonacci sequence from the initial values `n0` and `n1`.
-fibonacciSequence :: Integer -> Integer -> [Integer]
-fibonacciSequence n0 n1 = n0 : fibonacciSequence n1 (n0 + n1)
+-- | `fibonacciFrom n0 n1` generates the Fibonacci sequence from the initial values `n0` and `n1`.
+fibonacciFrom :: Integer -> Integer -> [Integer]
+fibonacciFrom n0 n1 = n0 : fibonacciFrom n1 (n0 + n1)
 
 -- | Turn a number into a list of its digits, most to least significant.
 digits :: (Integral a, Read a, Show a) => a -> [a]
@@ -151,7 +151,7 @@ numDivisors = genericLength . divisors
 totient :: Integer -> Integer
 totient n
     | isPrime n = n - 1
-    | otherwise = foldl' (\acc p -> acc - acc `div` p) n . filter ((==0) . (n `mod`)) $ takeWhile (<=n`div`2) primes
+    | otherwise = foldl' (\acc p -> acc - acc `div` p) n $ primeFactors n
 
 -- | Amicable numbers *n* are not equal to their proper divisor sum, *d(n)*, but have the property *d(d(n)) = n*.
 amicable :: Integer -> Bool
@@ -207,15 +207,21 @@ reciprocal = reciprocal' 1 where
         | n `mod` x == 0 = [n `div` x]
         | otherwise      = (last . digits) (n `div` x) : reciprocal' (10 * n) x
 
--- | `continuedFraction outside num dens` produces an infinite list
-continuedFractionSequence :: Integer -> Integer -> [Integer] -> [Rational]
-continuedFractionSequence outside numer denoms = outside % 1 : continuedFractionSequence' outside numer denoms (numer % head denoms) where
-    continuedFractionSequence' :: Integer -> Integer -> [Integer] -> Rational -> [Rational]
-    continuedFractionSequence' outside _     []     frac = [outside % 1 + frac]
-    continuedFractionSequence' outside numer denoms frac =
-        let newdenom = fromIntegral (head denoms) + frac
-            newfrac  = fromIntegral numer / newdenom
-        in  outside % 1 + newfrac : continuedFractionSequence' outside numer (tail denoms) newfrac
+-- | `cfConvergents` takes a list of denominators and produces an infinite list of convergents. The continued fraction is assumed to be simple.
+cfConvergents :: [Integer] -> [Rational]
+cfConvergents [] = []
+cfConvergents [x] = [x % 1]
+cfConvergents (x:y:xs) = x % 1 : cfConvergents' (x * y + 1) y x 1 xs where
+    cfConvergents' :: Integer -> Integer -> Integer -> Integer -> [Integer] -> [Rational]
+    cfConvergents' pn qn pn1 qn1 []     = [pn % qn]
+    cfConvergents' pn qn pn1 qn1 (x:xs) =
+        let pn' = x * pn + pn1
+            qn' = x * qn + qn1
+        in  pn % qn : cfConvergents' pn' qn' pn qn xs
+
+getCF :: (Eq a, RealFrac a) => a -> [Integer]
+getCF (properFraction -> (i, f)) = i : if f == 0 then [] else getCF (recip f)
+
 
 -- | `spiralDiagonals k` lists the numbers appearing on the diagonals of the Ulam spiral of side length `k`, in order from 1.
 spiralDiagonals :: Integer -> [Integer]
@@ -232,7 +238,7 @@ spiralDiagonals k = spiralDiagonals' 0 0 [1 .. k ^ 2] where
 narcissistic :: Integer -> Integer -> Bool
 narcissistic k n = (== n) . sum . map (^ k) $ digits n
 
--- | `repunit k` integer formed by repeating the digit 1 `k` times.
+-- | `repunit k` is the integer formed by repeating the digit 1 `k` times.
 repunit :: Integer -> Integer
 repunit = undigits . flip genericReplicate 1
 

@@ -4,10 +4,10 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 066dc87e0ec8882cac3915640e2d85ae9076abab950579d290efba8cd5e25c84
+-- hash: 5a89b4140c0f9e5b97aac77bdb0f0ed3456694a68a15fe0e8663f71643590bed
 
 name:           project-euler
-version:        0.1.0.1
+version:        0.1.0.2
 description:    Please see the README on GitHub at <https://github.com/mel-brown/project-euler#readme>
 homepage:       https://github.com/mel-brown/project-euler#readme
 bug-reports:    https://github.com/mel-brown/project-euler/issues
@@ -44,6 +44,7 @@ library
     , combinat
     , containers
     , data-default-class
+    , deepseq
     , exact-combinatorics
     , extra
     , fitspec
@@ -70,6 +71,7 @@ executable project-euler-exe
     , combinat
     , containers
     , data-default-class
+    , deepseq
     , exact-combinatorics
     , extra
     , fitspec

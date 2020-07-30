@@ -1,4 +1,4 @@
-version:    0.1.0.1
+version:    0.1.0.2
 name:       project-euler
 github:     "mel-brown/project-euler"
 license:    BSD3
@@ -26,6 +26,7 @@ dependencies:
   - containers
   - combinat
   - data-default-class
+  - deepseq
   - exact-combinatorics
   - extra
   - fitspec

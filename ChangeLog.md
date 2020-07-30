@@ -8,7 +8,8 @@
 - rely only on `Data.Tuple.Extra` instead of `Control.Arrow`
 - hardcoded the big number in q008
 - replaced uses of `Monad (->)` with `Applicative (->)`
-- questions 62 and 63
+- questions 62, 63, 64, 65, 66, and 70 complete
+- removed questions outside "safe-for-publication" range (1-100)
 
 ## Version 0.1.0.1
 - moved `pascal` (Polynomials -> NumbersExtra) and removed duplicate `choose`
