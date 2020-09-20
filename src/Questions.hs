@@ -1,32 +1,38 @@
 {-# LANGUAGE PatternSynonyms #-}
 
 module Questions where
-
-import           CalendarExtra
-import           Control.Lens           hiding ((:>))
-import           Control.DeepSeq        (force)
-import           Data.Bits
-import           Data.Bits.Lens
-import           Data.Char
-import           Data.Foldable
-import           Data.Function          (on)
-import qualified Data.Map.Strict        as Map
-import           Data.Map.Strict        (Map, (!?))
-import           Data.Maybe
-import           Data.Number.BigFloat
-import           Data.Number.Fixed
-import           Data.Ord
-import qualified Data.Set               as Set
-import           Data.Set               (Set)
--- import           Data.Sequence          (Seq, ViewR(..), viewr)
--- import qualified Data.Sequence          as Seq
-import           Data.Tuple.Extra
-import qualified Data.Vector            as Vec
-import           Data.Word              (Word32)
-import           NumbersExtra
-import           Poker
-import           System.IO.Unsafe       (unsafePerformIO)
-import           Debug.Trace
+import CalendarExtra
+    ( Date (day)
+    , Weekday (Sunday)
+    , weekday
+    , yearCalendar
+    )
+import Control.DeepSeq (force)
+import Control.Lens
+    ( Identity (Identity, runIdentity)
+    , none
+    , toListOf
+    )
+import Data.Bits (Bits (xor))
+import Data.Bits.Lens (bits)
+import Data.Char (chr, isAlpha, isSpace, ord)
+import Data.Foldable (Foldable (foldl', toList))
+import Data.Function (on)
+import Data.Map.Strict ((!?), Map)
+import Data.Map.Strict qualified as Map
+import Data.Maybe (fromMaybe, listToMaybe, mapMaybe)
+import Data.Number.BigFloat (BigFloat)
+import Data.Number.Fixed (Prec500)
+import Data.Ord (Down (Down))
+import Data.Set (Set)
+import Data.Set qualified as Set
+import Data.Tuple.Extra ((&&&), first, second, both, fst3, snd3, thd3)
+import Data.Vector qualified as Vector
+import Data.Word (Word32)
+import NumbersExtra
+import Poker (in054)
+import System.IO.Unsafe (unsafePerformIO)
+-- import Debug.Trace
 
 pattern (:%) :: b -> b -> Ratio b
 pattern num :% denom <- ((\x -> (numerator x, denominator x)) -> (num, denom))
@@ -120,9 +126,9 @@ q008 :: Integer
 -}
 q008 = maximum $ products in008 where
     products :: [Integer] -> [Integer]
-    products [] = []
-    products xs | length xs < 13 = []
-                | otherwise      = product (take 13 xs) : products (tail xs)
+    products xs
+        | length xs < 13 = []
+        | otherwise      = product (take 13 xs) : products (tail xs)
 
     in008 :: [Integer]
     in008 = digits 7316717653133062491922511967442657474235534919493496983520312774506326239578318016984801869478851843858615607891129494954595017379583319528532088055111254069874715852386305071569329096329522744304355766896648950445244523161731856403098711121722383113622298934233803081353362766142828064444866452387493035890729629049156044077239071381051585930796086670172427121883998797908792274921901699720888093776657273330010533678812202354218097512545405947522435258490771167055601360483958644670632441572215539753697817977846174064955149290862569321978468622482839722413756570560574902614079729686524145351004748216637048440319989000889524345065854122758866688116427171479924442928230863465674813919123162824586178664583591245665294765456828489128831426076900422421902267105562632111110937054421750694165896040807198403850962455444362981230987879927244284909188845801561660979191338754992005240636899125607176060588611646710940507754100225698315520005593572972571636269561882670428252483600823257530420752963450
@@ -141,7 +147,7 @@ q010 :: Integer
     The sum of the primes below 10 is 2 + 3 + 5 + 7 = 17.
     Find the sum of all the primes below two million.
 -}
-q010 = sum $ takeWhile (< 2000000) primes
+q010 = sum' $ takeWhile (< 2000000) primes
 
 q011 :: Integer
 {-
@@ -350,7 +356,7 @@ q021 :: Integer
     The proper divisors of 284 are 1, 2, 4, 71 and 142; so d(284) = 220.
     Evaluate the sum of all the amicable numbers under 10000.
 -}
-q021 = sum $ filter amicable [1..10000]
+q021 = sum' $ filter amicable [1..10000]
 
 q022 :: Integer
 {-
@@ -480,7 +486,7 @@ q028 :: Integer
     It can be verified that the sum of the numbers on the diagonals is 101.
     What is the sum of the numbers on the diagonals in a 1001 by 1001 spiral formed in the same way?
 -}
-q028 = sum $ spiralDiagonals 1001
+q028 = sum' $ spiralDiagonals 1001
 
 q029 :: Integer
 {-
@@ -507,7 +513,7 @@ q030 :: Integer
     Find the sum of all the numbers that can be written
     as the sum of fifth powers of their digits.
 -}
-q030 = sum $ filter (narcissistic 5) [2..1000000]
+q030 = sum' $ filter (narcissistic 5) [2..1000000]
 
 q031 :: Integer
 {-
@@ -569,7 +575,7 @@ q034 :: Integer
     Find the sum of all numbers which are equal to the sum of the factorial of their digits.
     Note: as 1! = 1 and 2! = 2 are not sums they are not included.
 -}
-q034 = sum $ filter ((==) <*> (sumOn (factorial . fromIntegral) . digits)) [3..100000]
+q034 = sum' $ filter ((==) <*> (sumOn' (factorial . fromIntegral) . digits)) [3..100000]
 
 q035 :: Integer
 {-
@@ -596,7 +602,7 @@ q036 :: Integer
     Find the sum of all numbers, less than one million, which are palindromic in base 10 and base 2.
     (Please note that the palindromic number, in either base, may not include leading zeros.)
 -}
-q036 = sum $ filter ((&&) <$> palindrome <*> palindrome2) [1..1000000] where
+q036 = sum' $ filter ((&&) <$> palindrome <*> palindrome2) [1..1000000] where
     palindrome2 :: Integer -> Bool
     -- ! Convert to a Word32 because Integer has arbitrary size
     -- ! and the numbers we're testing are positive and less than 1e6
@@ -790,7 +796,7 @@ q048 :: Integer
     The series, 1^1 + 2^2 + 3^3 + ... + 10^10 = 10405071317.
     Find the last ten digits of the series, 1^1 + 2^2 + 3^3 + ... + 1000^1000.
 -}
-q048 = undigits . reverse . take 10 . reverse . digits . sum $ map (\n -> n^n) [1..1000]
+q048 = undigits . reverse . take 10 . reverse . digits . sum' $ map (\n -> n^n) [1..1000]
 
 q049 :: Integer
 {-
@@ -862,8 +868,8 @@ q051 = head $ filter (\n -> (>=8) . length . filter isPrime . replaceDigits n $ 
         where
             replaceDigits' :: Integer -> [Integer] -> [Integer] -> [Integer]
             replaceDigits' n ks ls =
-                let n' = Vec.fromList (digits n)
-                in  map (undigits . toList . (n' Vec.//)) . groupSortOn snd $ (,) <$> map fromIntegral ks <*> ls
+                let n' = Vector.fromList (digits n)
+                in  map (undigits . toList . (n' Vector.//)) . groupSortOn snd $ (,) <$> map fromIntegral ks <*> ls
 
     sixDigitPrimes :: [Integer]
     sixDigitPrimes = takeWhile ((==6) . length . digits) $ dropWhile ((<6) . length . digits) primes
@@ -962,7 +968,7 @@ q056 :: Integer
     Despite their size, the sum of the digits in each number is only 1.
     Considering natural numbers of the form a^b, where a, b < 100, what is the maximum digital sum?
 -}
-q056 = maximum [ sum $ digits (a^b) | a <- [1..99], b <- [1..99] ]
+q056 = maximum [ sum' $ digits (a^b) | a <- [1..99], b <- [1..99] ]
 
 q057 :: Integer
 {-
@@ -1019,7 +1025,7 @@ q060 :: Integer
     The primes 3, 7, 109, and 673, are quite remarkable. By taking any two primes and concatenating them in any order the result will always be prime. For example, taking 7 and 109, both 7109 and 1097 are prime. The sum of these four primes, 792, represents the lowest sum for a set of four primes with this property.
     Find the lowest sum for a set of five primes for which any two primes concatenate to produce another prime.
 -}
-q060 = sum $ minimumOn sum fiveConcatenablePrimes where
+q060 = sum' $ minimumOn sum fiveConcatenablePrimes where
     primeBound :: [Integer]
     primeBound = takeWhile (<=10000) primes
 
@@ -1051,7 +1057,7 @@ q061 :: Integer
     --?     Pentagonal     P(5,n) = n(3n−1)/2     1, 5, 12, 22, 35, ...
     --?     Hexagonal      P(6,n) = n(2n−1)       1, 6, 15, 28, 45, ...
     --?     Heptagonal     P(7,n) = n(5n−3)/2     1, 7, 18, 34, 55, ...
-    --?    Octagonal      P(8,n) = n(3n−2)       1, 8, 21, 40, 65, ...
+    --?     Octagonal      P(8,n) = n(3n−2)       1, 8, 21, 40, 65, ...
     The ordered set of three 4-digit numbers: 8128, 2882, 8281, has three interesting properties.
         (1) The set is cyclic, in that the last two digits of each number is the first two digits of the next number (including the last number with the first).
         (2) Each polygonal type: triangle (P(3,127) = 8128), square (P(4,91) = 8281), and pentagonal (P5,44=2882), is represented by a different number in the set.
@@ -1169,8 +1175,7 @@ q066 :: Integer
 {-
     Consider quadratic Diophantine equations of the form:
     --?     x² – Dy² = 1
-    For example, when D=13, the minimal solution in x is 649² - 13×180² = 1.
-    It can be assumed that there are no solutions in positive integers when D is square.
+    For example, when D=13, the minimal solution in x is 649² - 13×180² = 1. It can be assumed that there are no solutions in positive integers when D is square.
     By finding minimal solutions in x for D = {2, 3, 5, 6, 7}, we obtain the following:
     --?     3² – 2×2² = 1
     --?     2² – 3×1² = 1
@@ -1204,9 +1209,7 @@ q071 :: Integer
     It can be seen that 2/5 is the fraction immediately to the left of 3/7.
     By listing the set of reduced proper fractions for d <= 1,000,000 in ascending order of size, find the numerator of the fraction immediately to the left of 3/7.
 -}
-q071 = numerator . last . fst . breakOn [3 % 7] $ orderedReducedFractions 1000000 where
-    orderedReducedFractions :: Integer -> [Rational]
-    orderedReducedFractions d = nubSort [ x % y | y <- [d,d-1..2], x <- [1..y], gcd x y == 1 ]
+q071 = numerator . last . takeWhile (<3%7) $ sort [ n % d | d <- [2..1000000], n <- [7 * d `div` 3..7 * d `div` 2], gcd d n == 1 ]
 
 
 

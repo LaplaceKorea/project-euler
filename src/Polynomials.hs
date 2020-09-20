@@ -6,11 +6,17 @@ module Polynomials
     , numPartitionsUsing
     ) where
 
-import Control.Arrow
-import Data.Default.Class
-import Data.Foldable
+import Data.Default.Class ( Default(..) )
+import Data.Foldable ( Foldable(toList) )
 import Data.List.Extra
-import Data.Maybe
+    ( genericLength
+    , genericReplicate
+    , genericTake
+    , stripPrefix
+    , dropWhileEnd'
+    )
+import Data.Tuple.Extra ( both )
+import Data.Maybe ( fromMaybe, mapMaybe )
 
 newtype Polynomial a = Poly [a] deriving (Eq, Functor, Foldable)
 
@@ -35,7 +41,7 @@ instance (Eq a, Ord a, Num a, Show a) => Show (Polynomial a) where
 poly :: (Default a, Eq a) => [a] -> Polynomial a
 poly [] = def
 poly xs | xs == [def] = def
-        | otherwise   = Poly . reverse . dropWhile (==def) . reverse $ xs
+        | otherwise   = Poly $ dropWhileEnd' (==def) xs
 
 deg :: (Default a, Eq a) => Polynomial a -> Integer
 deg x@(Poly xs) | x == def  = -1
@@ -56,7 +62,7 @@ zipPoly f x@(Poly xs) y@(Poly ys) = poly $ zipWith f xs' ys' where
 polyQuotRem :: (Eq a, Default a, Integral a) => Polynomial a -> Polynomial a -> (Polynomial a, Polynomial a)
 polyQuotRem a@(Poly as) b@(Poly bs)
     | b == def  = error "divide by 0"
-    | otherwise = poly *** poly $ go as bs [] where
+    | otherwise = both poly $ go as bs [] where
         go as bs qs | d < 0     = (qs, as)
                     | otherwise = go as' bs qs'
                     where d     = length as - length bs

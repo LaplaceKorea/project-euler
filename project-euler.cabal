@@ -4,10 +4,10 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 5a89b4140c0f9e5b97aac77bdb0f0ed3456694a68a15fe0e8663f71643590bed
+-- hash: b82786712d4eb2b39951965e736a01fa8fd3eab48162edd9e6b9de390d19aee5
 
 name:           project-euler
-version:        0.1.0.2
+version:        0.1.1.0
 description:    Please see the README on GitHub at <https://github.com/mel-brown/project-euler#readme>
 homepage:       https://github.com/mel-brown/project-euler#readme
 bug-reports:    https://github.com/mel-brown/project-euler/issues
@@ -36,7 +36,7 @@ library
       Paths_project_euler
   hs-source-dirs:
       src
-  default-extensions: LambdaCase MultiWayIf TupleSections RecordWildCards BangPatterns ViewPatterns TypeOperators KindSignatures InstanceSigs OverloadedStrings EmptyCase GeneralizedNewtypeDeriving DeriveFoldable DeriveFunctor DeriveGeneric DeriveLift DeriveTraversable
+  default-extensions: LambdaCase MultiWayIf TupleSections RecordWildCards BangPatterns ViewPatterns TypeOperators KindSignatures InstanceSigs OverloadedStrings EmptyCase GeneralizedNewtypeDeriving ImportQualifiedPost DeriveFoldable DeriveFunctor DeriveGeneric DeriveLift DeriveTraversable
   build-depends:
       arithmoi
     , async
@@ -62,7 +62,7 @@ executable project-euler-exe
       Paths_project_euler
   hs-source-dirs:
       app
-  default-extensions: LambdaCase MultiWayIf TupleSections RecordWildCards BangPatterns ViewPatterns TypeOperators KindSignatures InstanceSigs OverloadedStrings EmptyCase GeneralizedNewtypeDeriving DeriveFoldable DeriveFunctor DeriveGeneric DeriveLift DeriveTraversable
+  default-extensions: LambdaCase MultiWayIf TupleSections RecordWildCards BangPatterns ViewPatterns TypeOperators KindSignatures InstanceSigs OverloadedStrings EmptyCase GeneralizedNewtypeDeriving ImportQualifiedPost DeriveFoldable DeriveFunctor DeriveGeneric DeriveLift DeriveTraversable
   ghc-options: -threaded -rtsopts -with-rtsopts=-N -O2
   build-depends:
       arithmoi

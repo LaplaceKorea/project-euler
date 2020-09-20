@@ -1,5 +1,9 @@
 # Changelog for project-euler
 
+## Version 0.1.1.0
+- updated to GHC 8.10.2
+- code formatting
+
 ## Version 0.1.0.2
 - renamed `primeFactorPairs` to `primePowerDecomposition`
 - optimized `totient` function

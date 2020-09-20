@@ -1,53 +1,74 @@
 module NumbersExtra
-    ( module Control.Monad
-    , module Data.List.Extra
-    , module Data.Ratio
-    , module Math.Combinat.Partitions.Integer
-    , module Polynomials
-    , count
-    , sumOn, productOn
-    , isPrime, primes, primeFactors, primePowerDecomposition, distinctPrimeFactors
-    , ngons, triangles, squares, pentagons, hexagons, heptagons, octagons
+    ( module Control.Monad,
+      module Data.List.Extra,
+      module Data.Ratio,
+      module Polynomials,
+      count,
+      isPrime,
+      primes,
+      primeFactors,
+      primePowerDecomposition,
+      distinctPrimeFactors,
+      ngons,
+      triangles,
+      squares,
+      pentagons,
+      hexagons,
+      heptagons,
+      octagons,
       -- , ngonal, triangular, quadrilateral, pentagonal, hexagonal, heptagonal, octagonal
-    , fibonaccis, fibonacciFrom
-    , digits, undigits, backward
-    , palindrome
-    , pandigital0, pandigital1, pandigitals0, pandigitals1
-    , divisors, numDivisors, properDivisors, totient
-    , amicable, deficient, perfect, abundant
-    , pythags
-    , collatz
-    , factorial, pascal, choose
-    , reciprocal
-    , cfConvergents, getCF
-    , spiralDiagonals
-    , narcissistic
-    , repunit
-    , stirling1, stirling2
-    , sequentialPairs
-    , pairwiseSequential
+      fibonaccis,
+      fibonacciFrom,
+      digits,
+      undigits,
+      backward,
+      palindrome,
+      pandigital0,
+      pandigital1,
+      pandigitals0,
+      pandigitals1,
+      divisors,
+      numDivisors,
+      properDivisors,
+      totient,
+      amicable,
+      deficient,
+      perfect,
+      abundant,
+      pythags,
+      collatz,
+      factorial,
+      pascal,
+      choose,
+      reciprocal,
+      cfConvergents,
+      getCF,
+      spiralDiagonals,
+      narcissistic,
+      repunit,
+      stirling1,
+      stirling2,
+      sequentialPairs,
+      pairwiseSequential,
     )
 where
 
-import           Control.Arrow
-import           Control.Monad
-import           Data.List.Extra
-import qualified Data.Numbers.Primes as P
-import           Data.Ratio
-import           Math.Combinat.Partitions.Integer
-import qualified Math.Combinatorics.Exact.Binomial  as B
-import qualified Math.Combinatorics.Exact.Factorial as F
-import           Math.NumberTheory.Primes.Testing (isPrime)
-import           Polynomials
+import Control.Monad
+import Data.List.Extra
+import Data.Tuple.Extra ((&&&))
+import Data.Numbers.Primes qualified as P
+import Data.Ratio
+    ( Ratio, Rational, (%), approxRational, denominator, numerator )
+-- import Math.Combinat.Partitions.Integer
+import Math.Combinatorics.Exact.Binomial  qualified as B
+import Math.Combinatorics.Exact.Factorial qualified as F
+import Math.NumberTheory.Primes.Testing (isPrime)
+import Polynomials
 import qualified Util (count)
 
 -- | count b xs == genericLength (filter b xs)
 count :: (Integral b) => (a -> Bool) -> [a] -> b
 count = (fromIntegral .) . Util.count
-
-sumOn, productOn :: (Num b) => (a -> b) -> [a] -> b
-sumOn f = foldl' (\acc x -> acc + f x) 0
-productOn f = foldl' (\acc x -> acc * f x) 1
 
 primes :: [Integer]
 primes = P.primes :: [Integer]
