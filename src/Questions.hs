@@ -28,11 +28,13 @@ import Data.Ord (Down (Down))
 import Data.Set (Set)
 import Data.Set qualified as Set
 import Data.Tuple.Extra ((&&&), first, second, both, fst3, snd3, thd3)
+import Data.Vector (Vector, (!))
 import Data.Vector qualified as Vector
 import Data.Word (Word32)
 import NumbersExtra
 import Poker (in054)
 import System.IO.Unsafe (unsafePerformIO)
+import Control.Monad.Extra ((&&^))
 -- import Debug.Trace
 
 pattern (:%) :: b -> b -> Ratio b
@@ -69,7 +71,7 @@ q004 :: IO Integer
     made from the product of two 2-digit numbers is 9009 = 91 × 99.
     Find the largest palindrome made from the product of two 3-digit numbers.
 -}
-q004 = pure . maximum . filter palindrome $ (*) <$> [999,998..100] <*> [999,998..100]
+q004 = pure . head . dropWhile (not . palindrome) . sortOn Down $ (*) <$> [999,998..100] <*> [999,998..100]
 
 q005 :: IO Integer
 {-
@@ -316,9 +318,9 @@ q018 :: IO Integer
     However, Problem 67, is the same challenge with a triangle containing one-hundred rows;
     it cannot be solved by brute force, and requires a clever method! ;o)
 -}
-q018 = pure . head $ foldr1 algo in018 where
-    in018 :: [[Integer]]
-    in018 = map (map read . words) . lines . unsafePerformIO $ readFile "./Inputs/018.txt"
+q018 = head . foldr1 algo <$> in018 where
+    in018 :: IO [[Integer]]
+    in018 = map (map read . words) . lines <$> readFile "./Inputs/018.txt"
 
     algo :: [Integer] -> [Integer] -> [Integer]
     algo (x:xs) (y:z:ys) = max (x+y) (x+z) : algo xs (z:ys)
@@ -714,7 +716,7 @@ q043 :: IO Integer
     --?     d(8)d(9)d(10) = 289 is divisible by 17
     Find the sum of all 0 to 9 pandigital numbers with this property.
 -}
-q043 = pure . sum . filter (and . (map test [1..7] <*>) . pure) $ pandigitals0 9 where
+q043 = pure . sum' . filter (and . (map test [1..7] <*>) . pure) $ pandigitals0 9 where
     test :: Integer -> Integer -> Bool
     test k n = (primes !! fromIntegral (k-1) `elem`) . primeFactors . undigits . genericTake 3 . genericDrop k $ digits n
 
@@ -982,7 +984,7 @@ q057 :: IO Integer
     --?     1 + 1/(2 + 1/(2 + 1/(2 + 1/2))) = 41/29 = 1.41379...
     The next three expansions are 99/70, 239/169, and 577/408, but the eighth expansion, 1393985, is the first example where the number of digits in the numerator exceeds the number of digits in the denominator. In the first one-thousand expansions, how many fractions contain a numerator with more digits than the denominator?
 -}
-q057 = pure . count (\rat -> length (digits $ numerator rat) > length (digits $ denominator rat)) . take 1000 . drop 1 $ cfConvergents (1 : repeat 2)
+q057 = pure . count (\(n :% d) -> length (digits n) > length (digits d)) . take 1000 . drop 1 $ cfConvergents (1 : repeat 2)
 
 q058 :: IO Integer
 {-
@@ -999,9 +1001,11 @@ q058 :: IO Integer
 -}
 q058 = pure . primeRatioSideLength 0 1 . tail $ spiralDiagonals 30001 where
     primeRatioSideLength :: Integer -> Integer -> [Integer] -> Integer
-    primeRatioSideLength !ps !all (x:y:z:w:xs) =
-        let p = count isPrime [x,y,z,w]
-        in  if (ps+p) % (all+4) < 1 % 10 then (all+5) `div` 2 else primeRatioSideLength (ps+p) (all+4) xs
+    primeRatioSideLength !ps !all (x : y : z : w : xs) =
+        let p = count isPrime [x, y, z, w]
+         in if (ps + p) % (all + 4) < 1 % 10
+            then (all + 5) `div` 2
+            else primeRatioSideLength (ps + p) (all + 4) xs
     primeRatioSideLength ps all _ = if ps % all < 1 % 10 then all else 0
 
 q059 :: IO Integer
@@ -1014,9 +1018,11 @@ q059 :: IO Integer
     If the password is shorter than the message, which is likely, the key is repeated cyclically throughout the message. The balance for this method is using a sufficiently long password key for security, but short enough to be memorable.
     Your task has been made easy, as the encryption key consists of three lower case characters. Using "./Inputs/059.txt", a file containing the encrypted ASCII codes, and the knowledge that the plain text must contain common English words, decrypt the message and find the sum of the ASCII values in the original text.
 -}
-q059 = pure . fromIntegral . sum . map ord . head . filter (" the " `isInfixOf`) $ map (map (chr . fromIntegral) . zipWith xor in059 . cycle) threeLetters where
-    in059 :: [Integer]
-    in059 = map read . lines . unsafePerformIO $ readFile "./Inputs/059.txt"
+q059 = do
+    input <- in059
+    pure . fromIntegral . sum . map ord . head . filter (" the " `isInfixOf`) $ map (map (chr . fromIntegral) . zipWith xor input . cycle) threeLetters where
+    in059 :: IO [Integer]
+    in059 = map read . lines <$> readFile "./Inputs/059.txt"
 
     threeLetters :: [[Integer]]
     threeLetters = (\x y z -> map fromIntegral [ord x, ord y, ord z]) <$> ['a'..'z'] <*> ['a'..'z'] <*> ['a'..'z']
@@ -1032,7 +1038,7 @@ q060 = pure . sum' $ minimumOn sum' fiveConcatenablePrimes where
 
     fiveConcatenablePrimes :: [[Integer]]
     fiveConcatenablePrimes = [ [a, b, c, d, e]
-                             | a <- primeBound
+                             | a <- reverse primeBound
                              , b <- dropWhile (<=a) primeBound
                              , concatenablePrime [a] b
                              , c <- dropWhile (<=b) primeBound
@@ -1189,6 +1195,64 @@ q066 :: IO Integer
 q066 = pure . fst3 . maximumOn snd3 $ mapMaybe pellSolution [1..1000] where
     pellSolution :: Integer -> Maybe (Integer, Integer, Integer)
     pellSolution n = listToMaybe [ (n, x, y) | (x :% y) <- cfConvergents $ getCF (sqrt (fromIntegral n) :: BigFloat Prec500), x^2 == 1 + n * y^2 ]
+
+q067 :: IO Integer
+{-
+    By starting at the top of the triangle below and moving to adjacent numbers on the row below, the maximum total from top to bottom is 23.
+
+           3
+          7 4
+         2 4 6
+        8 5 9 3
+
+    That is, 3 + 7 + 4 + 9 = 23.
+    Find the maximum total from top to bottom in triangle.txt, a 15K text file containing a triangle with one-hundred rows.
+-}
+q067 = head . foldr1 algo <$> in067 where
+    in067 :: IO [[Integer]]
+    in067 = map (map read . words) . lines <$> readFile "./Inputs/067.txt"
+
+    algo :: [Integer] -> [Integer] -> [Integer]
+    algo (x:xs) (y:z:ys) = max (x+y) (x+z) : algo xs (z:ys)
+    algo _ _ = []
+
+q068 :: IO Integer
+{-
+    Consider the "magic" 3-gon ring, filled with the numbers 1 to 6, and each line adding to nine.
+    Working clockwise, and starting from the group of three with the numerically lowest external node (4,3,2 in this example), each solution can be described uniquely. For example, the above solution can be described by the set: 4,3,2; 6,2,1; 5,1,3.
+
+    It is possible to complete the ring with four different totals: 9, 10, 11, and 12. There are eight solutions in total.
+
+    Total   Solution Set
+    9       4,2,3; 5,3,1; 6,1,2
+    9       4,3,2; 6,2,1; 5,1,3
+    10      2,3,5; 4,5,1; 6,1,3
+    10      2,5,3; 6,3,1; 4,1,5
+    11      1,4,6; 3,6,2; 5,2,4
+    11      1,6,4; 5,4,2; 3,2,6
+    12      1,5,6; 2,6,4; 3,4,5
+    12      1,6,5; 3,5,4; 2,4,6
+
+    By concatenating each group it is possible to form 9-digit strings; the maximum string for a 3-gon ring is 432621513.
+
+    Using the numbers 1 to 10, and depending on arrangements, it is possible to form 16- and 17-digit strings. What is the maximum 16-digit string for a "magic" 5-gon ring?
+-}
+q068 = pure . resultString . maximumOn resultString $ filter (sumsEqual &&^ lexOrder &&^ noMiddleTens) fiveGons where
+    sumsEqual :: Vector Integer -> Bool
+    sumsEqual xs = allSame $ map (sum' . (<*> [xs])) [[(! 0), (! 1), (! 2)], [(! 3), (! 2), (! 4)], [(! 5), (! 4), (! 6)], [(! 7), (! 6), (! 8)], [(! 9), (! 8), (! 1)]]
+
+    lexOrder :: Vector Integer -> Bool
+    lexOrder xs = all (((xs ! 0) <=) . (xs !)) [3, 5, 7, 9]
+
+    -- to guarantee 16-digit strings
+    noMiddleTens :: Vector Integer -> Bool
+    noMiddleTens = all (/=10) . ([(! 1), (! 2), (! 4), (! 6), (! 8)] <*>) . pure
+
+    resultString :: Vector Integer -> Integer
+    resultString xs = undigits $ map (xs !) [0, 1, 2, 3, 2, 4, 5, 4, 6, 7, 6, 8, 9, 8, 1]
+
+    fiveGons :: [Vector Integer]
+    fiveGons = map Vector.fromList $ sort (permutations [1..10])
 
 q070 :: IO Integer
 {-
