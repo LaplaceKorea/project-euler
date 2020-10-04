@@ -11,9 +11,8 @@ module CalendarExtra
     )
 where
 
-import Data.List
-import Data.Maybe
-import NumbersExtra
+import Data.Maybe (catMaybes, fromJust)
+import NumbersExtra (digits)
 
 justIf :: a -> Bool -> Maybe a
 x `justIf` b = if b then Just x else Nothing

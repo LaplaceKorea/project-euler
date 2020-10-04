@@ -6,8 +6,8 @@ module Polynomials
     , numPartitionsUsing
     ) where
 
-import Data.Default.Class ( Default(..) )
-import Data.Foldable ( Foldable(toList) )
+import Data.Default.Class (Default (..))
+import Data.Foldable (Foldable (toList))
 import Data.List.Extra
     ( genericLength
     , genericReplicate
@@ -15,8 +15,8 @@ import Data.List.Extra
     , stripPrefix
     , dropWhileEnd'
     )
-import Data.Tuple.Extra ( both )
-import Data.Maybe ( fromMaybe, mapMaybe )
+import Data.Maybe (fromMaybe, mapMaybe)
+import Data.Tuple.Extra (both)
 
 newtype Polynomial a = Poly [a] deriving (Eq, Functor, Foldable)
 
@@ -63,15 +63,17 @@ polyQuotRem :: (Eq a, Default a, Integral a) => Polynomial a -> Polynomial a -> 
 polyQuotRem a@(Poly as) b@(Poly bs)
     | b == def  = error "divide by 0"
     | otherwise = both poly $ go as bs [] where
-        go as bs qs | d < 0     = (qs, as)
-                    | otherwise = go as' bs qs'
-                    where d     = length as - length bs
-                          k     = last as `div` last bs
-                          ks    = map (*k) $ replicate d def ++ bs
-                          qs'   = toList $ poly qs + poly (replicate d def ++ [k])
-                          as'   = case last as `mod` last bs of
-                                       0 -> toList $ poly as - poly ks
-                                       _ -> toList $ (poly as * fromIntegral (last bs)) - poly ks
+        go as bs qs
+            | d < 0     = (qs, as)
+            | otherwise = go as' bs qs'
+            where
+                d   = length as - length bs
+                k   = last as `div` last bs
+                ks  = map (*k) $ replicate d def ++ bs
+                qs' = toList $ poly qs + poly (replicate d def ++ [k])
+                as' = case last as `mod` last bs of
+                            0 -> toList $ poly as - poly ks
+                            _ -> toList $ (poly as * fromIntegral (last bs)) - poly ks
 
 displayPoly :: (Eq a, Ord a, Num a, Show a) => Polynomial a -> String
 displayPoly (Poly as) =
