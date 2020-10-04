@@ -1,35 +1,35 @@
 module Poker (in054) where
 
-import Control.Arrow
-import Control.Monad
-import Data.Function
-import Data.List.Extra
-import Data.Maybe
-import Data.Ord
+import Data.Function (on)
+import Data.List.Extra ((\\), elemIndex, groupOn, sort, sortOn)
+import Data.Maybe (fromJust)
+import Data.Ord (Down (Down))
 import Data.Tuple.Extra (both)
-import System.IO.Unsafe
+import System.IO.Unsafe (unsafePerformIO)
 import Test.FitSpec.Utils (subsets)
 
-data CardValue = One
-               | Two
-               | Three
-               | Four
-               | Five
-               | Six
-               | Seven
-               | Eight
-               | Nine
-               | Ten
-               | Jack
-               | Queen
-               | King
-               | Ace
-               deriving (Eq, Ord, Show, Enum, Bounded)
-data Suit = Spade
-          | Club
-          | Heart
-          | Diamond
-          deriving (Eq, Show, Enum)
+data CardValue
+    = One
+    | Two
+    | Three
+    | Four
+    | Five
+    | Six
+    | Seven
+    | Eight
+    | Nine
+    | Ten
+    | Jack
+    | Queen
+    | King
+    | Ace
+    deriving (Eq, Ord, Show, Enum, Bounded)
+data Suit
+    = Spade
+    | Club
+    | Heart
+    | Diamond
+    deriving (Eq, Show, Enum)
 
 data Card = Card { val :: CardValue, suit :: Suit } deriving (Eq)
 
@@ -99,16 +99,17 @@ deck :: [Card]
 deck = Card <$> [Two .. Ace] <*> [Spade .. Diamond]
 
 type Poker = [Card]
-data PokerHand = HighCard  [Card]
-               | OnePair   [Card] [Card]
-               | TwoPairs  [Card] [Card] Card
-               | ThreeKind [Card] [Card]
-               | Straight  [Card]
-               | Flush     [Card]
-               | FullHouse [Card] [Card]
-               | FourKind  [Card] Card
-               | StrFlush  Card
-               deriving (Eq, Show, Ord)
+data PokerHand
+    = HighCard  [Card]
+    | OnePair   [Card] [Card]
+    | TwoPairs  [Card] [Card] Card
+    | ThreeKind [Card] [Card]
+    | Straight  [Card]
+    | Flush     [Card]
+    | FullHouse [Card] [Card]
+    | FourKind  [Card] Card
+    | StrFlush  Card
+    deriving (Eq, Show, Ord)
 
 sameSuit :: [Card] -> Bool
 sameSuit h = all ((== suit (head h)) . suit) $ tail h
@@ -127,28 +128,22 @@ wheel :: [CardValue] -> Bool
 wheel = (==[Two, Three, Four, Five, Ace]) . sort
 
 strFlush :: Poker -> Bool
-strFlush = liftM2 (&&) sameSuit straight
+strFlush = (&&) <$> sameSuit <*> straight
 
 fourKind :: Poker -> Bool
-fourKind h = let hs = filter ((==4) . length) $ subsets h
-             in  any sameValue hs
+fourKind = any sameValue . filter ((==4) . length) . subsets
 
 threeKind :: Poker -> Bool
-threeKind h = let hs = filter ((==3) . length) $ subsets h
-              in  any sameValue hs
+threeKind = any sameValue . filter ((==3) . length) . subsets
 
 twoPairs :: Poker -> Bool
-twoPairs h = let h' = filter sameValue . filter ((==2) . length) $ subsets h
-             in  any (pair . (h \\)) h'
+twoPairs h = any (pair . (h \\)) . filter sameValue . filter ((==2) . length) $ subsets h
 
 pair :: Poker -> Bool
-pair h = any sameValue . filter ((==2) . length) $ subsets h
+pair = any sameValue . filter ((==2) . length) . subsets
 
 fullHouse :: Poker -> Bool
-fullHouse h
-    | threeKind h = let h' = filter sameValue . filter ((==3) . length) $ subsets h
-                    in  pair (h \\ head h')
-    | otherwise   = False
+fullHouse h = (threeKind h &&) . pair . (h \\) . head . filter sameValue . filter ((==3) . length) $ subsets h
 
 hand :: Poker -> PokerHand
 hand h@[a, b, c, d, e]
@@ -169,5 +164,5 @@ hand h@[a, b, c, d, e]
 
 type PokerGame = (PokerHand, PokerHand)
 
-in054 :: [PokerGame]
-in054 = map (both hand . splitAt 5 . map readCard . words) . lines . unsafePerformIO $ readFile "./Inputs/054.txt"
+in054 :: IO [PokerGame]
+in054 = map (both hand . splitAt 5 . map readCard . words) . lines <$> readFile "./Inputs/054.txt"
