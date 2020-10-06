@@ -1582,4 +1582,5 @@ q = \case
     77  -> q077
     78  -> q078
     79  -> q079
+    80  -> q080
     x   -> error "that's it so far"
