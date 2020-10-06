@@ -1,3 +1,6 @@
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE TypeSynonymInstances #-}
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE PatternSynonyms #-}
 
 module Questions where
@@ -22,14 +25,15 @@ import Data.Number.Fixed (Prec500)
 import Data.Ord (Down (Down))
 import Data.Set (Set)
 import Data.Set qualified as Set
-import Data.Tuple.Extra ((&&&), first, second, both, fst3, snd3, thd3)
+import Data.Tuple.Extra ((&&&), both, first, second, fst3, snd3, thd3)
 import Data.Vector (Vector, (!))
 import Data.Vector qualified as Vector
 import Data.Word (Word32)
+import Debug.Trace ()
+import FunctionExtra (takeWhileUniqueOrd)
+import Math.Combinat.Partitions.Integer (Partition, countPartitions, fromPartition, partitions)
 import NumbersExtra
-import FunctionExtra
 import Poker (in054)
--- import Debug.Trace
 
 pattern (:%) :: b -> b -> Ratio b
 pattern num :% denom <- ((\x -> (numerator x, denominator x)) -> (num, denom))
@@ -1394,9 +1398,85 @@ q075 = pure . count ((<= 1500000) . FX.sum') $ pythagsHypOptimized 1500000 where
     children :: V3 Integer -> [V3 Integer]
     children = ((!*) <$> [a, b, c] <*>) . pure
 
+q076 :: IO Integer
+{-
+    It is possible to write five as a sum in exactly six different ways:
+        4 + 1
+        3 + 2
+        3 + 1 + 1
+        2 + 2 + 1
+        2 + 1 + 1 + 1
+        1 + 1 + 1 + 1 + 1
+    How many different ways can one hundred be written as a sum of at least two positive integers?
+-}
+q076 = pure $ countPartitions 100 - 1
 
+q077 :: IO Integer
+{-
+    It is possible to write ten as the sum of primes in exactly five different ways:
+        7 + 3
+        5 + 5
+        5 + 3 + 2
+        3 + 3 + 2 + 2
+        2 + 2 + 2 + 2 + 2
+    What is the first value which can be written as the sum of primes in over five thousand different ways?
+-}
+q077 = pure . fromIntegral . head $ dropWhile ((< 5000) . count primePartition . partitions) [1..] where
+    primePartition :: Partition -> Bool
+    primePartition = all (isPrime . fromIntegral) . fromPartition
 
+q078 :: IO Integer
+{-
+    Let p(n) represent the number of different ways in which n coins can be separated into piles.
+    For example, five coins can be separated into piles in exactly seven different ways, so p(5)=7.
+        OOOOO
+        OOOO  O
+        OOO   OO
+        OOO   O    O
+        OO    OO   O
+        OO    O    O    O
+        O     O    O    O    O
+    Find the least value of n for which p(n) is divisible by one million.
+-}
+q078 = pure . fromIntegral . head $ dropWhile (((<= 1000000) ||^ ((/= 0) . (`mod` 1000000))) . countPartitions) [1..]
 
+q079 :: IO Integer
+{-
+    A common security method used for online banking is to ask the user for three random characters from a passcode. For example, if the passcode was 531278, they may ask for the 2nd, 3rd, and 5th characters; the expected reply would be: 317.
+    The text file, keylog.txt, contains fifty successful login attempts.
+    Given that the three characters are always asked for in order, analyse the file so as to determine the shortest possible secret passcode of unknown length.
+-}
+q079 = code [] <$> in079 where
+    in079 :: IO [[Integer]]
+    in079 = map (digits . read) . lines <$> readFile "./Inputs/079.txt"
+
+    middles :: [[Integer]] -> [Integer]
+    middles = concatMap (\case (_:y:_) -> [y]; _ -> [])
+
+    firstDigit :: [[Integer]] -> Integer
+    firstDigit ps = head . filter (`notElem` middles ps) $ concatMap (take 1) ps
+
+    newPWs :: [[Integer]] -> [[Integer]]
+    newPWs ps =
+        let d = firstDigit ps
+         in filter notNull $ map (\p -> if take 1 p == [d] then drop 1 p else p) ps
+
+    code :: [Integer] -> [[Integer]] -> Integer
+    code acc [] = undigits acc
+    code acc ps = code (acc ++ [firstDigit ps]) (newPWs ps)
+
+q080 :: IO Integer
+{-
+    It is well known that if the square root of a natural number is not an integer, then it is irrational. The decimal expansion of such square roots is infinite without any repeating pattern at all.
+    The square root of two is 1.41421356237309504880..., and the digital sum of the first one hundred decimal digits is 475.
+    For the first one hundred natural numbers, find the total of the digital sums of the first one hundred decimal digits for all the irrational square roots.
+-}
+q080 = pure . sumOn' (sum' . first100 . sqrt') $ [1..100] \\ takeWhile (<= 100) squares where
+    sqrt' :: Integer -> BigFloat Prec500
+    sqrt' = sqrt . fromIntegral
+
+    first100 :: BigFloat Prec500 -> [Integer]
+    first100 = take 100 . map (read . pure) . delete '.' . show
 
 
 
@@ -1498,4 +1578,8 @@ q = \case
     73  -> q073
     74  -> q074
     75  -> q075
+    76  -> q076
+    77  -> q077
+    78  -> q078
+    79  -> q079
     x   -> error "that's it so far"
