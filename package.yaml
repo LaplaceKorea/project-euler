@@ -32,6 +32,7 @@ dependencies:
   - fitspec
   - ghc
   - lens
+  - linear
   - numbers
   - primes
   - time

@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: b82786712d4eb2b39951965e736a01fa8fd3eab48162edd9e6b9de390d19aee5
+-- hash: acbad9de917b6877b24171438a364b0bd1a52e011c5f959d30bb6e3929de790d
 
 name:           project-euler
 version:        0.1.1.0
@@ -28,6 +28,7 @@ source-repository head
 library
   exposed-modules:
       CalendarExtra
+      FunctionExtra
       NumbersExtra
       Poker
       Polynomials
@@ -50,6 +51,7 @@ library
     , fitspec
     , ghc
     , lens
+    , linear
     , numbers
     , primes
     , time
@@ -77,6 +79,7 @@ executable project-euler-exe
     , fitspec
     , ghc
     , lens
+    , linear
     , numbers
     , primes
     , project-euler

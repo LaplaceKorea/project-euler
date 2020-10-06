@@ -1,7 +1,9 @@
 module NumbersExtra
-    ( module Control.Monad,
+    ( module Control.Monad.Extra,
+      module Control.Lens,
       module Data.List.Extra,
       module Data.Ratio,
+      module Linear,
       module Polynomials,
       count,
       isPrime,
@@ -36,6 +38,8 @@ module NumbersExtra
       perfect,
       abundant,
       pythags,
+      primPythags,
+      pythagsHyp,
       collatz,
       factorial,
       pascal,
@@ -53,12 +57,16 @@ module NumbersExtra
     )
 where
 
-import Control.Monad
-import Data.List.Extra
+import Control.Monad.Extra hiding (unit)
+import Control.Lens
+import Data.List.Extra hiding (cons, uncons, snoc, unsnoc)
+import Data.Set (Set)
+import Data.Set qualified as Set
 import Data.Tuple.Extra ((&&&))
 import Data.Numbers.Primes qualified as P
 import Data.Ratio
     ( Ratio, Rational, (%), approxRational, denominator, numerator )
+import Linear hiding (transpose)
 -- import Math.Combinat.Partitions.Integer
 import Math.Combinatorics.Exact.Binomial  qualified as B
 import Math.Combinatorics.Exact.Factorial qualified as F
@@ -79,8 +87,8 @@ primeFactors = P.primeFactors
 primePowerDecomposition :: Integer -> [(Integer, Integer)]
 primePowerDecomposition = map (head &&& genericLength) . group . primeFactors
 
-distinctPrimeFactors :: Integer -> [Integer]
-distinctPrimeFactors = nubOrd . primeFactors
+distinctPrimeFactors :: Integer -> Set Integer
+distinctPrimeFactors = foldl' (flip Set.insert) Set.empty . primeFactors
 
 -- | `ngons s` generates the `s`-gonal numbers.
 ngons :: Integer -> [Integer]
@@ -168,11 +176,17 @@ properDivisors n = divisors n \\ [n]
 numDivisors :: Integer -> Integer
 numDivisors = genericLength . divisors
 
+mobius :: Integer -> Integer
+mobius (primePowerDecomposition -> ps)
+    | any ((> 1) . snd) ps = 0
+    | odd (length ps) = -1
+    | otherwise = 1
+
 -- | Euler's totient function.
 totient :: Integer -> Integer
 totient n
     | isPrime n = n - 1
-    | otherwise = foldl' (\acc p -> acc - acc `div` p) n $ primeFactors n
+    | otherwise = foldl' (\acc p -> acc - (acc `div` p)) n $ distinctPrimeFactors n
 
 -- | Amicable numbers *n* are not equal to their proper divisor sum, *d(n)*, but have the property *d(d(n)) = n*.
 amicable :: Integer -> Bool
@@ -191,14 +205,29 @@ abundant :: Integer -> Bool
 abundant n = n > 1 && n < sum (properDivisors n)
 
 -- | An infinite list of Pythagorean triples.
-pythags :: [(Integer, Integer, Integer)]
+pythags :: [V3 Integer]
 pythags =
-    [ (a, b, c)
-    | c <- [1 ..]
+    [ V3 a b c
+    | c <- [5 ..]
     , b <- [1 .. c]
     , a <- [1 .. b]
-    , a ^ 2 + b ^ 2 == c ^ 2
+    , a^2 + b^2 == c^2
     ]
+
+primPythags :: [[[V3 Integer]]]
+primPythags = iterate (\vss@(vs:_) -> sortOn (^. _z) (concatMap children vs) : vss) [[V3 3 4 5]] where
+    a, b, c :: M33 Integer
+    a = V3 (V3   1 (-2) 2) (V3   2 (-1) 2) (V3   2 (-2) 3)
+    b = V3 (V3   1   2  2) (V3   2   1  2) (V3   2   2  3)
+    c = V3 (V3 (-1)  2  2) (V3 (-2)  1  2) (V3 (-2)  2  3)
+
+    children :: V3 Integer -> [V3 Integer]
+    children = ((!*) <$> [a, b, c] <*>) . pure
+
+pythagsHyp :: Integer -> [V3 Integer]
+pythagsHyp l =
+    let ps = concat . head $ dropWhile ((<= l) . (^. _z) . head . head) primPythags
+     in sortOn (^. _z) . filter ((<= l) . (^. _z)) $ concatMap (\v@(V3 _ _ c) -> map (v ^*) [1..l `div` c + 1]) ps
 
 -- | Generate the number's hailstone sequence.
 collatz :: Integer -> [Integer]
