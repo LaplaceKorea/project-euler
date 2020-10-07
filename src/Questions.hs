@@ -1357,7 +1357,7 @@ q074 :: IO Integer
     Starting with 69 produces a chain of five non-repeating terms, but the longest non-repeating chain with a starting number below one million is sixty terms.
     How many chains, with a starting number below one million, contain exactly sixty non-repeating terms?
 -}
-q074 = pure $ count ((== 60) . factSumChainLength) [1..1000000] where
+q074 = pure $ count ((== 60) . factSumChainLength) [0..999999] where
     factSum :: Integer -> Integer
     factSum = sum' . map factorial . digits
 
