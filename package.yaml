@@ -33,6 +33,7 @@ dependencies:
   - ghc
   - lens
   - linear
+  - mtl
   - numbers
   - primes
   - time

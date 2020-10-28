@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: acbad9de917b6877b24171438a364b0bd1a52e011c5f959d30bb6e3929de790d
+-- hash: 6d8732537e31a87244bf0a152fca005af23de390ebc9817210dc6619ed9fa825
 
 name:           project-euler
 version:        0.1.1.0
@@ -33,6 +33,7 @@ library
       Poker
       Polynomials
       Questions
+      Sudoku
   other-modules:
       Paths_project_euler
   hs-source-dirs:
@@ -52,6 +53,7 @@ library
     , ghc
     , lens
     , linear
+    , mtl
     , numbers
     , primes
     , time
@@ -80,6 +82,7 @@ executable project-euler-exe
     , ghc
     , lens
     , linear
+    , mtl
     , numbers
     , primes
     , project-euler
