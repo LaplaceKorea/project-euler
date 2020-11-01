@@ -1,4 +1,5 @@
 {-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE NumericUnderscores #-}
 {-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeFamilies #-}
@@ -16,7 +17,6 @@ import CalendarExtra (
 import Data.Bits (Bits (xor))
 import Data.Bits.Lens (bits)
 import Data.Char (chr, isAlpha, isDigit, isSpace, ord)
-import Data.Either.Extra (fromRight)
 import Data.Foldable (Foldable (toList))
 import Data.Foldable.Extra qualified as FX
 import Data.Function (on)
@@ -32,12 +32,12 @@ import Data.Tuple.Extra (first, fst3, second, snd3, (&&&))
 import Data.Vector (Vector, (!))
 import Data.Vector qualified as Vector
 import Data.Word (Word32)
-import Debug.Trace (traceShow)
 import FunctionExtra (takeWhileUniqueOrd, twoDimListToMap)
 import Math.Combinat.Partitions.Integer (Partition, countPartitions, fromPartition, partitions)
 import NumbersExtra
 import Poker (in054)
 import Sudoku (Sudoku, solve, sudoku)
+import Test.FitSpec.Utils (contained, subsets)
 
 pattern (:%) :: b -> b -> Ratio b
 pattern num :% denom <- ((\x -> (numerator x, denominator x)) -> (num, denom))
@@ -56,7 +56,7 @@ q001 = pure $ sum' [x | x <- [1 .. 999], x `mod` 3 == 0 || x `mod` 5 == 0]
 
     By starting with 1 and 2, the first 10 terms will be:
 
-        1, 2, 3, 5, 8, 13, 21, 34, 55, 89, ...
+        @1, 2, 3, 5, 8, 13, 21, 34, 55, 89, ...@
 
     By considering the terms in the Fibonacci sequence whose values do not exceed four million, find the sum of the even-valued terms.
 -}
@@ -108,7 +108,7 @@ q006 = pure $ sum [1 .. 100] ^ 2 - sum (take 100 squares)
 {- |
     By listing the first six prime numbers:
 
-        2, 3, 5, 7, 11, and 13,
+        @2, 3, 5, 7, 11, 13,@
 
     we can see that the 6th prime is 13.
 
@@ -279,17 +279,17 @@ q011 = maximum . ([verts, horizs, udiags, ddiags] <*>) . pure <$> grid
 
     The first ten terms would be:
 
-        1, 3, 6, 10, 15, 21, 28, 36, 45, 55, ...
+        @1, 3, 6, 10, 15, 21, 28, 36, 45, 55, ...@
 
     Let us list the factors of the first seven triangle numbers:
 
-        -  1: 1
-        -  3: 1,
-        -  6: 1, 2, 3, 6
-        - 10: 1, 2, 5, 10
-        - 21: 1, 3, 7, 21
-        - 15: 1, 3, 5, 15
-        - 28: 1, 2, 4, 7, 14, 28
+        - @ 1: 1@
+        - @ 3: 1,@
+        - @ 6: 1, 2, 3, 6@
+        - @10: 1, 2, 5, 10@
+        - @21: 1, 3, 7, 21@
+        - @15: 1, 3, 5, 15@
+        - @28: 1, 2, 4, 7, 14, 28@
 
     We can see that 28 is the first triangle number to have over five divisors.
 
@@ -310,12 +310,12 @@ q013 = undigits . take 10 . digits . sum' <$> in013
 {- |
     The following iterative sequence is defined for the set of positive integers:
 
-        - n -> n\/2 (n is even)
-        - n -> 3n + 1 (n is odd)
+        - @n -> n\/2 (n is even)@
+        - @n -> 3n + 1 (n is odd)@
 
     Using the rule above and starting with 13, we generate the following sequence:
 
-        13 -> 40 -> 20 -> 10 -> 5 -> 16 -> 8 -> 4 -> 2 -> 1
+        @13 -> 40 -> 20 -> 10 -> 5 -> 16 -> 8 -> 4 -> 2 -> 1@
 
     It can be seen that this sequence (starting at 13 and finishing at 1) contains 10 terms.
 
@@ -333,9 +333,9 @@ q015 :: IO Integer
 q015 = pure $ (2 * 20) `choose` 20
 
 {- |
-    215 = 32768 and the sum of its digits is
+    2^15 = 32768 and the sum of its digits is
 
-        3 + 2 + 7 + 6 + 8 = 26.
+        @3 + 2 + 7 + 6 + 8 = 26@
 
     What is the sum of the digits of the number 21000?
 -}
@@ -397,10 +397,13 @@ q017 = pure . genericLength $ concatMap getWord [1 .. 1000]
 {- |
     By starting at the top of the triangle below and moving to adjacent numbers on the row below, the maximum total from top to bottom is 23.
 
-        - 3
-        - 7 4
-        - 2 4 6
-        - 8 5 9 3
+        @   3   @
+
+        @  7 4  @
+
+        @ 2 4 6 @
+
+        @8 5 9 3@
 
     That is, 3 + 7 + 4 + 9 = 23.
 
@@ -498,7 +501,7 @@ q023 = pure . FX.sum' . Set.filter (not . isAbundSum) $ Set.fromAscList [1 .. li
 
     If all of the permutations are listed numerically or alphabetically, we call it /lexicographic order/. The lexicographic permutations of 0, 1 and 2 are:
 
-        012;   021;   102;   120;   201;   210.
+        @012   021   102   120   201   210@
 
     What is the millionth lexicographic permutation of the digits 0, 1, 2, 3, 4, 5, 6, 7, 8 and 9?
 -}
@@ -512,18 +515,18 @@ q024 = pure . undigits $ sort (permutations [0 .. 9]) !! 999999
 
     Hence the first 12 terms will be:
 
-        - F(1) = 1
-        - F(2) = 1
-        - F(3) = 2
-        - F(4) = 3
-        - F(5) = 5
-        - F(6) = 8
-        - F(7) = 13
-        - F(8) = 21
-        - F(9) = 34
-        - F(10) = 55
-        - F(11) = 89
-        - F(12) = 144
+        - @F(1) = 1@
+        - @F(2) = 1@
+        - @F(3) = 2@
+        - @F(4) = 3@
+        - @F(5) = 5@
+        - @F(6) = 8@
+        - @F(7) = 13@
+        - @F(8) = 21@
+        - @F(9) = 34@
+        - @F(10) = 55@
+        - @F(11) = 89@
+        - @F(12) = 144@
 
     The 12th term, F(12), is the first term to contain three digits.
 
@@ -535,15 +538,15 @@ q025 = pure . maybe 0 fromIntegral $ findIndex ((== 1000) . length . digits) fib
 {- |
     A unit fraction contains 1 in the numerator. The decimal representation of the unit fractions with denominators 2 to 10 are given:
 
-        - 1\/2  = 0.5
-        - 1\/3  = 0.(3)
-        - 1\/4  = 0.25
-        - 1\/5  = 0.2
-        - 1\/6  = 0.1(6)
-        - 1\/7  = 0.(142857)
-        - 1\/8  = 0.125
-        - 1\/9  = 0.(1)
-        - 1\/10 = 0.1
+        - @1\/2  = 0.5@
+        - @1\/3  = 0.(3)@
+        - @1\/4  = 0.25@
+        - @1\/5  = 0.2@
+        - @1\/6  = 0.1(6)@
+        - @1\/7  = 0.(142857)@
+        - @1\/8  = 0.125@
+        - @1\/9  = 0.(1)@
+        - @1\/10 = 0.1@
 
     Where 0.1(6) means 0.166666..., and has a 1-digit recurring cycle.
 
@@ -601,14 +604,14 @@ q028 = pure . sum' $ spiralDiagonals 1001
 {- |
     Consider all integer combinations of a^b for 2 <= a <= 5 and 2 <= b <= 5:
 
-        - 2^2 =  4, 2^3 =   8, 2^4 =  16, 2^5 =   32
-        - 3^2 =  9, 3^3 =  27, 3^4 =  81, 3^5 =  243
-        - 4^2 = 16, 4^3 =  64, 4^4 = 256, 4^5 = 1024
-        - 5^2 = 25, 5^3 = 125, 5^4 = 625, 5^5 = 3125
+        - @2^2 =  4, 2^3 =   8, 2^4 =  16, 2^5 =   32@
+        - @3^2 =  9, 3^3 =  27, 3^4 =  81, 3^5 =  243@
+        - @4^2 = 16, 4^3 =  64, 4^4 = 256, 4^5 = 1024@
+        - @5^2 = 25, 5^3 = 125, 5^4 = 625, 5^5 = 3125@
 
     If they are then placed in numerical order, with any repeats removed, we get the following sequence of 15 distinct terms:
 
-        4, 8, 9, 16, 25, 27, 32, 64, 81, 125, 243, 256, 625, 1024, 3125
+        @4, 8, 9, 16, 25, 27, 32, 64, 81, 125, 243, 256, 625, 1024, 3125@
 
     How many distinct terms are in the sequence generated by a^b for 2 <= a <= 100 and 2 <= b <= 100?
 -}
@@ -700,7 +703,7 @@ q034 = pure . sum' $ filter ((==) <*> (sumOn' (factorial . fromIntegral) . digit
 
     There are thirteen such primes below 100:
 
-        2, 3, 5, 7, 11, 13, 17, 31, 37, 71, 73, 79, and 97.
+        @2, 3, 5, 7, 11, 13, 17, 31, 37, 71, 73, 79, 97@
 
     How many circular primes are there below one million?
 -}
@@ -757,9 +760,9 @@ q037 = pure . sum' . filter (truncLeft &&^ truncRight) . takeWhile (< 1000000) $
 {- |
     Take the number 192 and multiply it by each of 1, 2, and 3:
 
-        - 192 × 2 = 384
-        - 192 × 1 = 192
-        - 192 × 3 = 576
+        - @192 × 2 = 384@
+        - @192 × 1 = 192@
+        - @192 × 3 = 576@
 
     By concatenating each product we get the 1 to 9 pandigital, 192384576.
 
@@ -797,7 +800,7 @@ q039 = pure . FX.sum' . head $ maximumOn length tris
 
     If d(n) represents the nth digit of the fractional part, find the value of the following expression:
 
-        d(1) × d(10) × d(100) × d(1000) × d(10000) × d(100000) × d(1000000).
+        @d(1) × d(10) × d(100) × d(1000) × d(10000) × d(100000) × d(1000000).@
 -}
 q040 :: IO Integer
 q040 = pure . product' $ map ((champernowne !!) . (10 ^)) [0 .. 6]
@@ -821,7 +824,7 @@ q041 = pure . maximum . filter isPrime $ pandigitals1 7
     The nth term of the sequence of triangle numbers is given by, t(n) = (1/2)n(n+1);
     so the first ten triangle numbers are:
 
-        1, 3, 6, 10, 15, 21, 28, 36, 45, 55, ...
+        @1, 3, 6, 10, 15, 21, 28, 36, 45, 55, ...@
 
     By converting each letter in a word to a number corresponding to its alphabetical position and adding these values we form a word value. For example, the word value for SKY is 19 + 11 + 25 = 55 = t(10). If the word value is a triangle number then we shall call the word a /triangle word/.
 
@@ -841,13 +844,13 @@ q042 = fromIntegral . count ((\n -> n `elem` takeWhile (<= n) triangles) . sum .
 
     Let d(1) be the 1st digit, d(2) be the 2nd digit, and so on. In this way, we note the following:
 
-        - d(2)d(3)d(4)  = 406 is divisible by 2
-        - d(3)d(4)d(5)  = 063 is divisible by 3
-        - d(4)d(5)d(6)  = 635 is divisible by 5
-        - d(5)d(6)d(7)  = 357 is divisible by 7
-        - d(6)d(7)d(8)  = 572 is divisible by 11
-        - d(7)d(8)d(9)  = 728 is divisible by 13
-        - d(8)d(9)d(10) = 289 is divisible by 17
+        - @d(2)d(3)d(4)  = 406 is divisible by 2@
+        - @d(3)d(4)d(5)  = 063 is divisible by 3@
+        - @d(4)d(5)d(6)  = 635 is divisible by 5@
+        - @d(5)d(6)d(7)  = 357 is divisible by 7@
+        - @d(6)d(7)d(8)  = 572 is divisible by 11@
+        - @d(7)d(8)d(9)  = 728 is divisible by 13@
+        - @d(8)d(9)d(10) = 289 is divisible by 17@
 
     Find the sum of all 0 to 9 pandigital numbers with this property.
 -}
@@ -860,7 +863,7 @@ q043 = pure . sum' . filter (and . (map test [1 .. 7] <*>) . pure) $ pandigitals
 {- |
     Pentagonal numbers are generated by the formula, Pn = n(3n−1)/2. The first ten pentagonal numbers are:
 
-        1, 5, 12, 22, 35, 51, 70, 92, 117, 145, ...
+        @1, 5, 12, 22, 35, 51, 70, 92, 117, 145, ...@
 
     It can be seen that P(4) + P(7) = 22 + 70 = 92 = P(8). However, their difference, 70 − 22 = 48, is not pentagonal.
 
@@ -995,7 +998,7 @@ q049 = pure . read . concatMap show . head . nubOrd . concat . filter (not . nul
 {- |
     The prime 41, can be written as the sum of six consecutive primes:
 
-        41 = 2 + 3 + 5 + 7 + 11 + 13
+        @41 = 2 + 3 + 5 + 7 + 11 + 13@
 
     This is the longest sum of consecutive primes that adds to a prime below one-hundred.
 
@@ -1027,7 +1030,7 @@ q050 =
 
     By replacing the 3rd and 4th digits of 56##3 with the same digit, this 5-digit number is the first example having seven primes among the ten generated numbers, yielding the family:
 
-        56003, 56113, 56333, 56443, 56663, 56773, and 56993.
+        @56003, 56113, 56333, 56443, 56663, 56773, 56993@
 
     Consequently 56003, being the first member of this family, is the smallest prime with this property.
 
@@ -1082,7 +1085,7 @@ q052 = pure . head $ filter test [100000 .. 999999]
 {- |
     There are exactly ten ways of selecting three from five, 12345:
 
-        123, 124, 125, 134, 135, 145, 234, 235, 245, 345
+        @123, 124, 125, 134, 135, 145, 234, 235, 245, 345@
 
     In combinatorics, we use the notation, (5 : 3) = 10.
 
@@ -1144,7 +1147,7 @@ q054 = count (uncurry (>)) <$> in054 -- ! declared in Poker.hs
 
     In fact, 10677 is the first number to be shown to require over fifty iterations before producing a palindrome:
 
-            4668731596684224866951378664 (53 iterations, 28-digits).
+        4668731596684224866951378664 (53 iterations, 28-digits).
 
     Surprisingly, there are palindromic numbers that are themselves Lychrel numbers; the first example is 4994.
 
@@ -1169,14 +1172,14 @@ q056 = pure $ maximum [sum' $ digits (a ^ b) | a <- [1 .. 99], b <- [1 .. 99]]
 {- |
     It is possible to show that the square root of two can be expressed as an infinite continued fraction.
 
-        √2 = 1 + 1\/(2 + 1\/(2 + 1\/(2 + ...)))
+        @√2 = 1 + 1\/(2 + 1\/(2 + 1\/(2 + ...)))@
 
     By expanding this for the first four iterations, we get:
 
-        - 1 + 1\/2 = 3\/2 = 1.5
-        - 1 + 1\/(2 + 1\/2) = 7\/5 = 1.4
-        - 1 + 1\/(2 + 1\/(2 + 1\/2)) = 17\/12 = 1.41666...
-        - 1 + 1\/(2 + 1\/(2 + 1\/(2 + 1\/2))) = 41\/29 = 1.41379...
+        - @1 + 1\/2 = 3\/2 = 1.5@
+        - @1 + 1\/(2 + 1\/2) = 7\/5 = 1.4@
+        - @1 + 1\/(2 + 1\/(2 + 1\/2)) = 17\/12 = 1.41666...@
+        - @1 + 1\/(2 + 1\/(2 + 1\/(2 + 1\/2))) = 41\/29 = 1.41379...@
 
     The next three expansions are 99\/70, 239\/169, and 577\/408, but the eighth expansion, 1393\/985, is the first example where the number of digits in the numerator exceeds the number of digits in the denominator. In the first one-thousand expansions, how many fractions contain a numerator with more digits than the denominator?
 -}
@@ -1277,17 +1280,17 @@ q060 = pure . sum' $ minimumOn sum' fiveConcatenablePrimes
 {- |
     Triangle, square, pentagonal, hexagonal, heptagonal, and octagonal numbers are all figurate (polygonal) numbers and are generated by the following formulae:
 
-        @Triangle       P(3, n) = n(n+1)/2      1, 3,  6, 10, 15, ...@
+        @Triangle       P(3, n) = n(n + 1)/2      1, 3,  6, 10, 15, ...@
 
-        @Square         P(4, n) = n²            1, 4,  9, 16, 25, ...@
+        @Square         P(4, n) = n²              1, 4,  9, 16, 25, ...@
 
-        @Pentagonal     P(5, n) = n(3n−1)/2     1, 5, 12, 22, 35, ...@
+        @Pentagonal     P(5, n) = n(3n − 1)/2     1, 5, 12, 22, 35, ...@
 
-        @Hexagonal      P(6, n) = n(2n−1)       1, 6, 15, 28, 45, ...@
+        @Hexagonal      P(6, n) = n(2n − 1)       1, 6, 15, 28, 45, ...@
 
-        @Heptagonal     P(7, n) = n(5n−3)/2     1, 7, 18, 34, 55, ...@
+        @Heptagonal     P(7, n) = n(5n − 3)/2     1, 7, 18, 34, 55, ...@
 
-        @Octagonal      P(8, n) = n(3n−2)       1, 8, 21, 40, 65, ...@
+        @Octagonal      P(8, n) = n(3n − 2)       1, 8, 21, 40, 65, ...@
 
     The ordered set of three 4-digit numbers: 8128, 2882, 8281, has three interesting properties.
 
@@ -1361,41 +1364,41 @@ q063 = pure . count (\(a, b) -> genericLength (digits $ a ^ b) == b) $ (,) <$> [
 {- |
     All square roots are periodic when written as continued fractions and can be written in the form:
 
-            √N = a0 + 1 \/ (a1 + 1 \/ (a2 + 1 \/ (a3 + ...)))
+        @√N = a0 + 1 \/ (a1 + 1 \/ (a2 + 1 \/ (a3 + ...)))@
 
     For example, let us consider √23:
 
-            √23 = 4 + √23 − 4 = 4 + 1 \/ (1 \/ (√23 - 4)) = 4 + 1 \/ (1 + (√23 - 3) \/ 7)
+        @√23 = 4 + √23 − 4 = 4 + 1 \/ (1 \/ (√23 - 4)) = 4 + 1 \/ (1 + (√23 - 3) \/ 7)@
 
     If we continue we would get the following expansion:
 
-            √23 = 4 + 1 \/ (1 + 1 \/ (3 + 1 \/ (1 + 1 \/ (8 + ...))))
+        @√23 = 4 + 1 \/ (1 + 1 \/ (3 + 1 \/ (1 + 1 \/ (8 + ...))))@
 
     The process can be summarised as follows:
 
-        - a0 = 4, 123√−4=23√+47=1+23√−37
-        - a1 = 1, 723√−3=7(23√+3)14=3+23√−32
-        - a2 = 3, 223√−3=2(23√+3)14=1+23√−47
-        - a3 = 1, 723√−4=7(23√+4)7=8+√23−4
-        - a4 = 8, 123√−4=23√+47=1+23√−37
-        - a5 = 1, 723√−3=7(23√+3)14=3+23√−32
-        - a6 = 3, 223√−3=2(23√+3)14=1+23√−47
-        - a7 = 1, 723√−4=7(23√+4)7=8+√23−4
+        - @a0 = 4, 1 \/ (√23 - 4) = (√23 + 4) \/ 7 = 1 + ((√23 − 3) \/ 7)@
+        - @a1 = 1, 7 \/ (√23 − 3) = 7(√23 + 3) \/ 14 = 3 + ((√23 − 3) \/ 2)@
+        - @a2 = 3, 2 \/ (√23 − 3) = 2(√23 + 3) \/ 14 = 1 + ((√23 − 4) \/ 7)@
+        - @a3 = 1, 7 \/ (√23 − 4) = 7(√23 + 4) \/ 7 = 8 + √23 − 4@
+        - @a4 = 8, 1 \/ (√23 - 4) = (√23 + 4) \/ 7 = 1 + ((√23 − 3) \/ 7)@
+        - @a5 = 1, 7 \/ (√23 − 3) = 7(√23 + 3) \/ 14 = 3 + ((√23 − 3) \/ 2)@
+        - @a6 = 3, 2 \/ (√23 − 3) = 2(√23 + 3) \/ 14 = 1 + ((√23 − 4) \/ 7)@
+        - @a7 = 1, 7 \/ (√23 − 4) = 7(√23 + 4) \/ 7 = 8 + √23 − 4@
 
     It can be seen that the sequence is repeating. For conciseness, we use the notation √23 = [4;(1, 3, 1, 8)], to indicate that the block (1, 3, 1, 8) repeats indefinitely.
 
     The first ten continued fraction representations of (irrational) square roots are:
 
-        - √2  = [1; (2)], period = 1
-        - √3  = [1; (1, 2)], period = 2
-        - √5  = [2; (4)], period = 1
-        - √6  = [2; (2, 4)], period = 2
-        - √7  = [2; (1, 1, 1, 4)], period = 4
-        - √8  = [2; (1, 4)], period = 2
-        - √10 = [3; (6)], period = 1
-        - √11 = [3; (3, 6)], period = 2
-        - √12 = [3; (2, 6)], period = 2
-        - √13 = [3; (1, 1, 1, 1, 6)], period = 5
+        - @√2  = [1; (2)],             period = 1@
+        - @√3  = [1; (1, 2)],          period = 2@
+        - @√5  = [2; (4)],             period = 1@
+        - @√6  = [2; (2, 4)],          period = 2@
+        - @√7  = [2; (1, 1, 1, 4)],    period = 4@
+        - @√8  = [2; (1, 4)],          period = 2@
+        - @√10 = [3; (6)],             period = 1@
+        - @√11 = [3; (3, 6)],          period = 2@
+        - @√12 = [3; (2, 6)],          period = 2@
+        - @√13 = [3; (1, 1, 1, 1, 6)], period = 5@
 
     Exactly four continued fractions, for N <= 13, have an odd period.
 
@@ -1410,27 +1413,27 @@ q064 = count odd <$> in064
 {- |
     The square root of 2 can be written as an infinite continued fraction.
 
-        √2 = 1 + 1\/(2 + 1\/(2 + 1\/(2 + ...)))
+        @√2 = 1 + 1\/(2 + 1\/(2 + 1\/(2 + ...)))@
 
     The infinite continued fraction can be written, √2 = [1; (2)], (2) indicates that 2 repeats ad infinitum. In a similar way, √23 = [4; (1, 3, 1, 8)].
 
     It turns out that the sequence of partial values of continued fractions for square roots provide the best rational approximations. Let us consider the convergents for √2.
 
-        - 1 + 1\/2                     = 3\/2
-        - 1 + 1 \/ (2 + 1/2)           = 7\/5
-        - 1 + 1 \/ (2 + 1 / (2 + 1/2)) = 17\/12
+        - @1 + 1\/2                     = 3\/2@
+        - @1 + 1 \/ (2 + 1/2)           = 7\/5@
+        - @1 + 1 \/ (2 + 1 / (2 + 1/2)) = 17\/12@
 
     Hence the sequence of the first ten convergents for √2 are:
 
-        1, 3\/2, 7\/5, 17\/12, 41\/29, 99\/70, 239\/169, 577\/408, 1393\/985, 3363\/2378.
+        @1, 3\/2, 7\/5, 17\/12, 41\/29, 99\/70, 239\/169, 577\/408, 1393\/985, 3363\/2378@
 
     What is most surprising is that the important mathematical constant,
 
-        e = [2; 1, 2, 1, 1, 4, 1,..., 1, 2k, 1,...].
+        @e = [2; 1, 2, 1, 1, 4, 1,..., 1, 2k, 1,...]@
 
     The first ten terms in the sequence of convergents for e are:
 
-        2, 3, 8\/3, 11\/4, 19\/7, 87\/32, 106\/39, 193\/71, 1264\/465, 1457\/536.
+        @2, 3, 8\/3, 11\/4, 19\/7, 87\/32, 106\/39, 193\/71, 1264\/465, 1457\/536@
 
     The sum of digits in the numerator of the 10th convergent is 1 + 4 + 5 + 7 = 17.
 
@@ -1568,9 +1571,7 @@ q069 :: IO Integer
 q069 = pure $ maximumOn (((/) `on` fromIntegral) <$> id <*> totient) [1 .. 1000000]
 
 {- |
-    Euler's Totient function, φ(n), is used to determine the number of numbers less than n which are relatively prime to n. For example, as 1, 2, 4, 5, 7, and 8, are all less than nine and relatively prime to nine,
-
-        φ(9) = 6.
+    Euler's Totient function, φ(n), is used to determine the number of numbers less than n which are relatively prime to n. For example, as 1, 2, 4, 5, 7, and 8, are all less than nine and relatively prime to nine, φ(9) = 6.
 
     The number 1 is considered to be relatively prime to every positive number, so φ(1) = 1.
 
@@ -1586,7 +1587,7 @@ q070 = pure . fst $ minimumOn (uncurry ((/) `on` fromIntegral)) [(x, totient x) 
 
     If we list the set of reduced proper fractions for d <= 8 in ascending order of size, we get:
 
-    1\/8, 1\/7, 1\/6, 1\/5, 1\/4, 2\/7, 1\/3, 3\/8, 2\/5, 3\/7, 1\/2, 4\/7, 3\/5, 5\/8, 2\/3, 5\/7, 3\/4, 4\/5, 5\/6, 6\/7, 7\/8
+    @1\/8, 1\/7, 1\/6, 1\/5, 1\/4, 2\/7, 1\/3, 3\/8, 2\/5, 3\/7, 1\/2, 4\/7, 3\/5, 5\/8, 2\/3, 5\/7, 3\/4, 4\/5, 5\/6, 6\/7, 7\/8@
 
     It can be seen that 2\/5 is the fraction immediately to the left of 3\/7.
 
@@ -1613,7 +1614,7 @@ q071 = pure . numerator $ mediant 0 1 (3 % 7) 1000000
 
     If we list the set of reduced proper fractions for d <= 8 in ascending order of size, we get:
 
-    1\/8, 1\/7, 1/\6, 1\/5, 1\/4, 2\/7, 1\/3, 3\/8, 2\/5, 3\/7, 1\/2, 4\/7, 3\/5, 5\/8, 2\/3, 5\/7, 3\/4, 4\/5, 5\/6, 6\/7, 7\/8
+    @1\/8, 1\/7, 1/\6, 1\/5, 1\/4, 2\/7, 1\/3, 3\/8, 2\/5, 3\/7, 1\/2, 4\/7, 3\/5, 5\/8, 2\/3, 5\/7, 3\/4, 4\/5, 5\/6, 6\/7, 7\/8@
 
     It can be seen that there are 21 elements in this set.
 
@@ -1627,7 +1628,7 @@ q072 = pure $ sumOn' totient [2 .. 1000000]
 
     If we list the set of reduced proper fractions for d <= 8 in ascending order of size, we get:
 
-    1\/8, 1\/7, 1\/6, 1\/5, 1\/4, 2\/7, 1\/3, 3\/8, 2\/5, 3\/7, 1\/2, 4\/7, 3\/5, 5\/8, 2\/3, 5\/7, 3\/4, 4\/5, 5\/6, 6\/7, 7\/8
+    @1\/8, 1\/7, 1\/6, 1\/5, 1\/4, 2\/7, 1\/3, 3\/8, 2\/5, 3\/7, 1\/2, 4\/7, 3\/5, 5\/8, 2\/3, 5\/7, 3\/4, 4\/5, 5\/6, 6\/7, 7\/8@
 
     It can be seen that there are 3 fractions between 1\/3 and 1\/2.
 
@@ -1650,15 +1651,15 @@ q073 = pure $ numFracs 3 2 12000
 
     Perhaps less well known is 169, in that it produces the longest chain of numbers that link back to 169; it turns out that there are only three such loops that exist:
 
-        - 169 → 363601 → 1454 → 169
-        - 871 → 45361 → 871
-        - 872 → 45362 → 872
+        - @169 -> 363601 -> 1454 -> 169@
+        - @871 -> 45361 -> 871@
+        - @872 -> 45362 -> 872@
 
     It is not difficult to prove that EVERY starting number will eventually get stuck in a loop. For example,
 
-        - 69 → 363600 → 1454 → 169 → 363601 (→ 1454)
-        - 78 → 45360 → 871 → 45361 (→ 871)
-        - 540 → 145 (→ 145)
+        - @69 -> 363600 -> 1454 -> 169 -> 363601 (-> 1454)@
+        - @78 -> 45360 -> 871 -> 45361 (-> 871)@
+        - @540 -> 145 (-> 145)@
 
     Starting with 69 produces a chain of five non-repeating terms, but the longest non-repeating chain with a starting number below one million is sixty terms.
 
@@ -1685,7 +1686,7 @@ q074 = pure $ count ((== 60) . factSumChainLength) [0 .. 999999]
 
     In contrast, some lengths of wire, like 20 cm, cannot be bent to form an integer sided right angle triangle, and other lengths allow more than one solution to be found; for example, using 120 cm it is possible to form exactly three different integer sided right angle triangles.
 
-        120 cm: (30, 40, 50), (20, 48, 52), (24, 45, 51)
+        - 120 cm: (30, 40, 50), (20, 48, 52), (24, 45, 51)
 
     Given that L is the length of the wire, for how many values of L <= 1500000 can exactly one integer sided right angle triangle be formed?
 -}
@@ -1714,12 +1715,12 @@ q075 = pure . count ((<= 1500000) . FX.sum') $ pythagsHypOptimized 1500000
 {- |
     It is possible to write five as a sum in exactly six different ways:
 
-        - 4 + 1;
-        - 3 + 2;
-        - 3 + 1 + 1;
-        - 2 + 2 + 1;
-        - 2 + 1 + 1 + 1;
-        - 1 + 1 + 1 + 1 + 1.
+        - 4 + 1
+        - 3 + 2
+        - 3 + 1 + 1
+        - 2 + 2 + 1
+        - 2 + 1 + 1 + 1
+        - 1 + 1 + 1 + 1 + 1
 
     How many different ways can one hundred be written as a sum of at least two positive integers?
 -}
@@ -1729,11 +1730,11 @@ q076 = pure $ countPartitions 100 - 1
 {- |
     It is possible to write ten as the sum of primes in exactly five different ways:
 
-        - 7 + 3;
-        - 5 + 5;
-        - 5 + 3 + 2;
-        - 3 + 3 + 2 + 2;
-        - 2 + 2 + 2 + 2 + 2.
+        - 7 + 3
+        - 5 + 5
+        - 5 + 3 + 2
+        - 3 + 3 + 2 + 2
+        - 2 + 2 + 2 + 2 + 2
 
     What is the first value which can be written as the sum of primes in over five thousand different ways?
 -}
@@ -1748,13 +1749,13 @@ q077 = pure . fromIntegral . head $ dropWhile ((< 5000) . count primePartition .
 
     For example, five coins can be separated into piles in exactly seven different ways, so p(5)=7.
 
-        - OOOOO;
-        - OOOO  O;
-        - OOO   OO;
-        - OOO   O    O;
-        - OO    OO   O;
-        - OO    O    O    O;
-        - O     O    O    O    O.
+        - OOOOO
+        - OOOO  O
+        - OOO   OO
+        - OOO   O    O
+        - OO    OO   O
+        - OO    O    O    O
+        - O     O    O    O    O
 
     Find the least value of n for which p(n) is divisible by one million.
 -}
@@ -1836,6 +1837,98 @@ q081 = pure 0
          in foldMatrix (v', s + m Map.! v) m
 
 {- |
+    Each of the six faces on a cube has a different digit (0 to 9) written on it; the same is done to a second cube. By placing the two cubes side-by-side in different positions we can form a variety of 2-digit numbers.
+
+    In fact, by carefully choosing the digits on both cubes it is possible to display all of the square numbers below one-hundred: 01, 04, 09, 16, 25, 36, 49, 64, and 81.
+
+    For example, one way this can be achieved is by placing {0, 5, 6, 7, 8, 9} on one cube and {1, 2, 3, 4, 8, 9} on the other cube.
+
+    However, for this problem we shall allow the 6 or 9 to be turned upside-down so that an arrangement like {0, 5, 6, 7, 8, 9} and {1, 2, 3, 4, 6, 7} allows for all nine square numbers to be displayed; otherwise it would be impossible to obtain 09.
+
+    In determining a distinct arrangement we are interested in the digits on each cube, not the order.
+
+        - @{1, 2, 3, 4, 5, 6}@ is equivalent to @{3, 6, 4, 1, 2, 5}@
+        - @{1, 2, 3, 4, 5, 6}@ is distinct from @{1, 2, 3, 4, 5, 9}@
+
+    But because we are allowing 6 and 9 to be reversed, the two distinct sets in the last example both represent the extended set {1, 2, 3, 4, 5, 6, 9} for the purpose of forming 2-digit numbers.
+
+    How many distinct arrangements of the two cubes allow for all of the square numbers to be displayed?
+-}
+q090 :: IO Integer
+q090 = pure . genericLength . nubOrdOn (\(xs, ys) -> sort [xs, ys]) $ [ (xs, ys) | xs <- sixDigitLists, ys <- sixDigitLists, (makesAllSquares `on` represented) xs ys ]
+  where
+    represented :: [Integer] -> [Integer]
+    represented xs
+        | 6 `elem` xs = nubOrd $ 9 : xs
+        | 9 `elem` xs = nubOrd $ 6 : xs
+        | otherwise = xs
+
+    sixDigitLists :: [[Integer]]
+    sixDigitLists = nubOrd . filter ((== 6) . length) $ subsets [0 .. 9]
+
+    makesAllSquares :: [Integer] -> [Integer] -> Bool
+    makesAllSquares xs ys = contained [(0, 1), (0, 4), (0, 9), (1, 6), (2, 5), (3, 6), (4, 9), (6, 4), (8, 1)] $ ((,) <$> xs <*> ys) ++ ((,) <$> ys <*> xs)
+
+{- |
+    A number chain is created by continuously adding the square of the digits in a number to form a new number until it has been seen before. For example,
+
+        - @44 -> 32 -> 13 -> 10 -> 1 -> 1@
+        - @85 -> 89 -> 145 -> 42 -> 20 -> 4 -> 16 -> 37 -> 58 -> 89@
+
+    Therefore any chain that arrives at 1 or 89 will become stuck in an endless loop. What is most amazing is that EVERY starting number will eventually arrive at 1 or 89.
+
+    How many starting numbers below ten million will arrive at 89?
+-}
+q092 :: IO Integer
+q092 = pure $ sumOn' multinomial $ filter unhappy orderedSevens
+  where
+    multinomial :: Integer -> Integer
+    multinomial = (div <$> factorial . genericLength <*> productOn' (factorial . genericLength) . group) . (\xs@(length -> x) -> if x < 7 then replicate (7 - x) 0 ++ xs else xs) . sort . digits
+
+    orderedSevens :: [Integer]
+    orderedSevens =
+        [ undigits [a, b, c, d, e, f, g]
+        | a <- [0 .. 9]
+        , b <- [a .. 9]
+        , c <- [b .. 9]
+        , d <- [c .. 9]
+        , e <- [d .. 9]
+        , f <- [e .. 9]
+        , g <- [if maximum [a, b, c, d, e, f] /= 0 then f else 1 .. 9]
+        ]
+
+    unhappy :: Integer -> Bool
+    unhappy = (firstSqSums !) . subtract 1 . fromIntegral . sqSum
+
+    sqSum :: Integer -> Integer
+    sqSum = sumOn' (^2) . digits
+
+    reaches89 :: Integer -> Bool
+    reaches89 = ((> 1) &&^ ((== 89) ||^ reaches89)) . sqSum
+
+    firstSqSums :: Vector Bool
+    firstSqSums = Vector.fromList $ map reaches89 [1 .. 81 * 7 + 1]
+
+{- |
+    By using each of the digits from the set, {1, 2, 3, 4}, exactly once, and making use of the four arithmetic operations (+, −, *, /) and brackets/parentheses, it is possible to form different positive integer targets.
+
+    For example,
+
+        - @8 = (4 * (1 + 3)) / 2@
+        - @14 = 4 * (3 + 1 / 2)@
+        - @19 = 4 * (2 + 3) − 1@
+        - @36 = 3 * 4 * (2 + 1)@
+
+    Note that concatenations of the digits, like 12 + 34, are not allowed.
+
+    Using the set, {1, 2, 3, 4}, it is possible to obtain thirty-one different target numbers of which 36 is the maximum, and each of the numbers 1 to 28 can be obtained before encountering the first non-expressible number.
+
+    Find the set of four distinct digits, a < b < c < d, for which the longest set of consecutive positive integers, 1 to n, can be obtained, giving your answer as a string: abcd.
+-}
+q093 :: IO Integer
+q093 = pure 0
+
+{- |
     Su Doku (Japanese, meaning "number place") is the name given to a popular puzzle concept. Its origin is unclear, but credit must be attributed to Leonhard Euler who invented a similar, and much more difficult, puzzle idea called Latin Squares. The objective of Su Doku puzzles, however, is to replace the blanks (or zeros) in a 9 by 9 grid in such that each row, column, and 3 by 3 box contains each of the digits 1 to 9.
 
     A well constructed Su Doku puzzle has a unique solution and can be solved by logic, although it may be necessary to employ "guess and test" methods in order to eliminate options (there is much contested opinion over this). The complexity of the search determines the difficulty of the puzzle; the example above is considered easy because it can be solved by straight forward direct deduction.
@@ -1849,6 +1942,21 @@ q096 = sumOn' (\m -> undigits $ map (fromIntegral . (m Map.!)) [V2 0 0, V2 0 1, 
   where
     sudokus :: IO [Sudoku]
     sudokus = map sudoku . chunksOf 9 . filter (all isDigit) . lines <$> readFile "./Inputs/096.txt"
+
+{- |
+    Comparing two numbers written in index form like 2^11 and 3^7 is not difficult, as any calculator would confirm that 2^11 = 2048 < 3^7 = 2187.
+
+    However, confirming that 632382^518061 > 519432^525806 would be much more difficult, as both numbers contain over three million digits.
+
+    Using [.\/Inputs\/099.txt](file://./../Inputs/099.txt), a 22K text file containing one thousand lines with a base/exponent pair on each line, determine which line number has the greatest numerical value.
+
+    /NOTE: The first two lines in the file represent the numbers in the example given above./
+-}
+q099 :: IO Integer
+q099 = fst . head . sortOn (Down . snd) . zip [1 ..] <$> in099
+  where
+    in099 :: IO [Double]
+    in099 = map ((\[x,y] -> read y * log (read x)) . splitOn ",") . lines <$> readFile "./Inputs/099.txt"
 
 -- | is there a better way to do this...?
 q :: Integer -> IO Integer
@@ -1933,5 +2041,8 @@ q = \case
     78 -> q078
     79 -> q079
     80 -> q080
+    90 -> q090
+    92 -> q092
     96 -> q096
+    99 -> q099
     _  -> error "that's it so far"
