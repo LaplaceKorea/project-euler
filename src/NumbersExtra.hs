@@ -11,6 +11,7 @@ module NumbersExtra
       primeFactors,
       primePowerDecomposition,
       distinctPrimeFactors,
+      radical,
       ngons,
       triangles,
       squares,
@@ -59,6 +60,7 @@ where
 
 import Control.Monad.Extra hiding (unit)
 import Control.Lens
+import Data.Foldable.Extra qualified as FX
 import Data.List.Extra hiding (cons, uncons, snoc, unsnoc)
 import Data.Set (Set)
 import Data.Set qualified as Set
@@ -89,6 +91,9 @@ primePowerDecomposition = map (head &&& genericLength) . group . primeFactors
 
 distinctPrimeFactors :: Integer -> Set Integer
 distinctPrimeFactors = foldl' (flip Set.insert) Set.empty . primeFactors
+
+radical :: Integer -> Integer
+radical = FX.product' . distinctPrimeFactors
 
 -- | `ngons s` generates the `s`-gonal numbers.
 ngons :: Integer -> [Integer]

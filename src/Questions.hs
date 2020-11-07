@@ -61,7 +61,7 @@ q001 = pure $ sum' [x | x <- [1 .. 999], x `mod` 3 == 0 || x `mod` 5 == 0]
     By considering the terms in the Fibonacci sequence whose values do not exceed four million, find the sum of the even-valued terms.
 -}
 q002 :: IO Integer
-q002 = pure . sum' . filter even $ takeWhile (< 4000000) fibonaccis
+q002 = pure . sum' . filter even $ takeWhile (< 4_000_000) fibonaccis
 
 {- |
     The prime factors of 13195 are 5, 7, 13 and 29.
@@ -69,7 +69,7 @@ q002 = pure . sum' . filter even $ takeWhile (< 4000000) fibonaccis
     What is the largest prime factor of the number 600851475143?
 -}
 q003 :: IO Integer
-q003 = pure . maximum $ primeFactors 600851475143
+q003 = pure . maximum $ primeFactors 600_851_475_143
 
 {- |
     A /palindromic number/ reads the same both ways. The largest palindrome made from the product of two 2-digit numbers is 9009 = 91 × 99.
@@ -115,7 +115,7 @@ q006 = pure $ sum [1 .. 100] ^ 2 - sum (take 100 squares)
     What is the 10001st prime number?
 -}
 q007 :: IO Integer
-q007 = pure $ primes !! 10000
+q007 = pure $ primes !! 10_000
 
 {- |
     The four adjacent digits in the 1000-digit number that have the greatest product are 9 × 9 × 8 × 9 = 5832.
@@ -191,7 +191,7 @@ q009 = pure . FX.product' . head . filter ((== 1000) . FX.sum') $ takeWhile ((< 
     Find the sum of all the primes below two million.
 -}
 q010 :: IO Integer
-q010 = pure . sum' $ takeWhile (< 2000000) primes
+q010 = pure . sum' $ takeWhile (< 2_000_000) primes
 
 {- |
     In the 20×20 grid below, four numbers along a diagonal line have been marked with parentheses.
@@ -324,7 +324,7 @@ q013 = undigits . take 10 . digits . sum' <$> in013
     Which starting number, under one million, produces the longest chain?
 -}
 q014 :: IO Integer
-q014 = pure $ maximumOn (length . collatz) [1000000, 999999 .. 1]
+q014 = pure $ maximumOn (length . collatz) [1_000_000, 999_999 .. 1]
 
 {- |
     Starting in the top left corner of a 2×2 grid and only being able to move to the right and down, there are exactly 6 routes to the bottom right corner. How many such routes are there through a 20×20 grid?
@@ -455,7 +455,7 @@ q020 = pure . sum' . digits $ factorial 100
     Evaluate the sum of all the amicable numbers under 10000.
 -}
 q021 :: IO Integer
-q021 = pure . sum' $ filter amicable [1 .. 10000]
+q021 = pure . sum' $ filter amicable [1 .. 10__000]
 
 {- |
     Using [.\/Inputs\/022.txt](file://./../Inputs/022.txt), a 46K text file containing over five-thousand first names, begin by sorting it into alphabetical order. Then working out the alphabetical value for each name, multiply this value by its alphabetical position in the list to obtain a name score.
@@ -488,7 +488,7 @@ q023 :: IO Integer
 q023 = pure . FX.sum' . Set.filter (not . isAbundSum) $ Set.fromAscList [1 .. limit]
   where
     limit :: Integer
-    limit = 28123
+    limit = 28_123
 
     abundants :: Set Integer
     abundants = Set.filter abundant $ Set.fromAscList [1 .. limit]
@@ -506,7 +506,7 @@ q023 = pure . FX.sum' . Set.filter (not . isAbundSum) $ Set.fromAscList [1 .. li
     What is the millionth lexicographic permutation of the digits 0, 1, 2, 3, 4, 5, 6, 7, 8 and 9?
 -}
 q024 :: IO Integer
-q024 = pure . undigits $ sort (permutations [0 .. 9]) !! 999999
+q024 = pure . undigits $ sort (permutations [0 .. 9]) !! 999_999
 
 {- |
     The /Fibonacci sequence/ is defined by the recurrence relation:
@@ -632,7 +632,7 @@ q029 = pure . genericLength . nubSort $ (^) <$> [2 .. 100] <*> [2 .. 100]
     Find the sum of all the numbers that can be written as the sum of fifth powers of their digits.
 -}
 q030 :: IO Integer
-q030 = pure . sum' $ filter (narcissistic 5) [2 .. 1000000]
+q030 = pure . sum' $ filter (narcissistic 5) [2 .. 1_000_000]
 
 {- |
     In the United Kingdom the currency is made up of pound (£) and pence (p). There are eight coins in general circulation:
@@ -696,7 +696,7 @@ q033 = pure . denominator . product' . map (uncurry (%)) $ filter (uncurry curio
     /Note: as 1! = 1 and 2! = 2 are not sums they are not included./
 -}
 q034 :: IO Integer
-q034 = pure . sum' $ filter ((==) <*> (sumOn' (factorial . fromIntegral) . digits)) [3 .. 100000]
+q034 = pure . sum' $ filter ((==) <*> (sumOn' (factorial . fromIntegral) . digits)) [3 .. 100_000]
 
 {- |
     The number, 197, is called a /circular prime/ because all rotations of the digits: 197, 971, and 719, are themselves prime.
@@ -708,7 +708,7 @@ q034 = pure . sum' $ filter ((==) <*> (sumOn' (factorial . fromIntegral) . digit
     How many circular primes are there below one million?
 -}
 q035 :: IO Integer
-q035 = pure . count circularPrime $ takeWhile (< 1000000) primes
+q035 = pure . count circularPrime $ takeWhile (< 1_000_000) primes
   where
     circularPrime :: Integer -> Bool
     circularPrime = ((not . null) &&^ (all isPrime)) . uncurry take . (length . digits &&& cyclize)
@@ -745,7 +745,7 @@ q036 = pure . sum' $ filter (palindrome &&^ palindrome2) [1 .. 1000000]
     /NOTE: 2, 3, 5, and 7 are not considered to be truncatable primes./
 -}
 q037 :: IO Integer
-q037 = pure . sum' . filter (truncLeft &&^ truncRight) . takeWhile (< 1000000) $ dropWhile (< 10) primes
+q037 = pure . sum' . filter (truncLeft &&^ truncRight) . takeWhile (< 1_000_000) $ dropWhile (< 10) primes
   where
     truncLeft :: Integer -> Bool
     truncLeft n
@@ -773,7 +773,7 @@ q037 = pure . sum' . filter (truncLeft &&^ truncRight) . takeWhile (< 1000000) $
     What is the largest 1 to 9 pandigital 9-digit number that can be formed as the concatenated product of an integer with (1, 2, ..., n) where n > 1?
 -}
 q038 :: IO Integer
-q038 = pure . maximum . filter pandigital1 $ map catProd [1 .. 10000]
+q038 = pure . maximum . filter pandigital1 $ map catProd [1 .. 10_000]
   where
     catProd :: Integer -> Integer
     catProd n = undigits . take 9 $ concatMap (digits . (n *)) [1 .. 9]
@@ -926,7 +926,7 @@ q045 = pure $ filter isPentagonal hexagons !! 2
     What is the smallest odd composite that cannot be written as the sum of a prime and twice a square?
 -}
 q046 :: IO Integer
-q046 = pure . head $ filter (nonGoldbach &&^ (not . isPrime)) [3, 5 .. 10001]
+q046 = pure . head $ filter (nonGoldbach &&^ (not . isPrime)) [3, 5 .. 10_001]
   where
     nonGoldbach :: Integer -> Bool
     nonGoldbach n = null [a + 2 * b | a <- takeWhile (< n) primes, b <- takeWhile (<= n `div` 2) squares, n == a + 2 * b]
@@ -946,7 +946,7 @@ q046 = pure . head $ filter (nonGoldbach &&^ (not . isPrime)) [3, 5 .. 10001]
     Find the first four consecutive integers to have four distinct prime factors each. What is the first of these numbers?
 -}
 q047 :: IO Integer
-q047 = pure $ firstOfFourConsecutive fourDistinctFactors [100000 ..]
+q047 = pure $ firstOfFourConsecutive fourDistinctFactors [100_000 ..]
   where
     fourDistinctFactors :: Integer -> Bool
     fourDistinctFactors = (>= 4) . length . distinctPrimeFactors
@@ -1016,13 +1016,13 @@ q050 =
     consecutivePrimeSums = groupOn (\(x, _, _) -> x) $ consecutivePrimeSums' 0 1
       where
         consecutivePrimeSums' n k =
-            if primes !! max 0 (fromIntegral n) > 1000000
+            if primes !! max 0 (fromIntegral n) > 1_000_000
             then []
             else let m = sum (genericTake k $ genericDrop n primes)
                   in if
-                    | m <= 1000000 && isPrime m ->
+                    | m <= 1_000_000 && isPrime m ->
                         (primes !! fromIntegral n, k, m) : consecutivePrimeSums' n (k + 1)
-                    | m <= 1000000 -> consecutivePrimeSums' n (k + 1)
+                    | m <= 1_000_000 -> consecutivePrimeSums' n (k + 1)
                     | otherwise -> consecutivePrimeSums' (n + 1) 1
 
 {- |
@@ -1070,7 +1070,7 @@ q051 = pure . head $ filter (\n -> (>= 8) . length . filter isPrime . replaceDig
     Find the smallest positive integer, x, such that 2x, 3x, 4x, 5x, and 6x, contain the same digits.
 -}
 q052 :: IO Integer
-q052 = pure . head $ filter test [100000 .. 999999]
+q052 = pure . head $ filter test [100_000 .. 999_999]
   where
     test :: Integer -> Bool
     test n =
@@ -1096,7 +1096,7 @@ q052 = pure . head $ filter test [100000 .. 999999]
     How many, not necessarily distinct, values of (n, r) for 1 <= n <= 100, are greater than one-million?
 -}
 q053 :: IO Integer
-q053 = pure $ genericLength [(n, r) | n <- [1 .. 100], r <- [0 .. n], n `choose` r > 1000000]
+q053 = pure $ genericLength [(n, r) | n <- [1 .. 100], r <- [0 .. n], n `choose` r > 1_000_000]
 
 {- |
     In the card game poker, a hand consists of five cards and are ranked, from lowest to highest, in the following way:
@@ -1154,7 +1154,7 @@ q054 = count (uncurry (>)) <$> in054 -- ! declared in Poker.hs
     How many Lychrel numbers are there below ten-thousand?
 -}
 q055 :: IO Integer
-q055 = pure . fromIntegral $ count lychrel [1 .. 10000]
+q055 = pure . fromIntegral $ count lychrel [1 .. 10_000]
   where
     lychrel :: Integer -> Bool
     lychrel = none palindrome . take 50 . drop 1 . iterate ((+) <*> backward)
@@ -1208,7 +1208,7 @@ q057 = pure . count (\(n :% d) -> length (digits n) > length (digits d)) . take 
     If one complete new layer is wrapped around the spiral above, a square spiral with side length 9 will be formed. If this process is continued, what is the side length of the square spiral for which the ratio of primes along both diagonals first falls below 10%?
 -}
 q058 :: IO Integer
-q058 = pure . primeRatioSideLength 0 1 . tail $ spiralDiagonals 30001
+q058 = pure . primeRatioSideLength 0 1 . tail $ spiralDiagonals 30_001
   where
     primeRatioSideLength :: Integer -> Integer -> [Integer] -> Integer
     primeRatioSideLength !ps !all (x : y : z : w : xs) =
@@ -1254,7 +1254,7 @@ q060 :: IO Integer
 q060 = pure . sum' $ minimumOn sum' fiveConcatenablePrimes
   where
     primeBound :: [Integer]
-    primeBound = takeWhile (<= 10000) primes
+    primeBound = takeWhile (<= 10_000) primes
 
     fiveConcatenablePrimes :: [[Integer]]
     fiveConcatenablePrimes =
@@ -1307,7 +1307,7 @@ q061 = pure . sum . head . nubSort . filter cyclic . map (map snd) . concatMap (
     match n m = drop 2 (digits n) == take 2 (digits m)
 
     fourDigitNgons :: Integer -> [Integer]
-    fourDigitNgons = takeWhile (<= 10000) . dropWhile (< 1000) . ngons
+    fourDigitNgons = takeWhile (<= 10_000) . dropWhile (< 1000) . ngons
 
     matches :: (Integer, Integer) -> Map (Integer, Integer) [(Integer, Integer)]
     matches (k, val)
@@ -1351,7 +1351,7 @@ q062 = pure . (^ 3) . fst . minimumOn fst . Map.elems $ Map.filter ((== 5) . snd
     biggestCubePerm = undigits . sortOn Down . digits . (^ 3)
 
     cubesByLargestPerm :: Map Integer (Integer, Integer)
-    cubesByLargestPerm = foldl' (\m (k, v) -> Map.insertWith (const $ second succ) k v m) Map.empty [(biggestCubePerm n, (n, 1)) | n <- [345 .. 10000]]
+    cubesByLargestPerm = foldl' (\m (k, v) -> Map.insertWith (const $ second succ) k v m) Map.empty [(biggestCubePerm n, (n, 1)) | n <- [345 .. 10_000]]
 
 {- |
     The 5-digit number, 16807 = 7^5, is also a fifth power. Similarly, the 9-digit number, 134217728 = 8^9, is a ninth power.
@@ -1568,7 +1568,7 @@ q068 = pure . resultString . maximumOn resultString $ filter (sumsEqual &&^ lexO
     Find the value of n <= 1000000 for which n\/φ(n) is a maximum.
 -}
 q069 :: IO Integer
-q069 = pure $ maximumOn (((/) `on` fromIntegral) <$> id <*> totient) [1 .. 1000000]
+q069 = pure $ maximumOn (((/) `on` fromIntegral) <$> id <*> totient) [1 .. 1_000_000]
 
 {- |
     Euler's Totient function, φ(n), is used to determine the number of numbers less than n which are relatively prime to n. For example, as 1, 2, 4, 5, 7, and 8, are all less than nine and relatively prime to nine, φ(9) = 6.
@@ -1594,7 +1594,7 @@ q070 = pure . fst $ minimumOn (uncurry ((/) `on` fromIntegral)) [(x, totient x) 
     By listing the set of reduced proper fractions for d <= 1000000 in ascending order of size, find the numerator of the fraction immediately to the left of 3\/7.
 -}
 q071 :: IO Integer
-q071 = pure . numerator $ mediant 0 1 (3 % 7) 1000000
+q071 = pure . numerator $ mediant 0 1 (3 % 7) 1_000_000
   where
     mediant :: Rational -> Rational -> Rational -> Integer -> Rational
     mediant (a :% b) (c :% d) comp limit =
@@ -1621,7 +1621,7 @@ q071 = pure . numerator $ mediant 0 1 (3 % 7) 1000000
     How many elements would be contained in the set of reduced proper fractions for d <= 1000000?
 -}
 q072 :: IO Integer
-q072 = pure $ sumOn' totient [2 .. 1000000]
+q072 = pure $ sumOn' totient [2 .. 1_000_000]
 
 {- |
     Consider the fraction, n\/d, where n and d are positive integers. If n < d and gcd(n, d) = 1, it is called a reduced proper fraction.
@@ -1635,7 +1635,7 @@ q072 = pure $ sumOn' totient [2 .. 1000000]
     How many fractions lie between 1\/3 and 1\/2 in the sorted set of reduced proper fractions for d <= 12000?
 -}
 q073 :: IO Integer
-q073 = pure $ numFracs 3 2 12000
+q073 = pure $ numFracs 3 2 12_000
   where
     numFracs :: Integer -> Integer -> Integer -> Integer
     numFracs minD maxD limit =
@@ -1666,7 +1666,7 @@ q073 = pure $ numFracs 3 2 12000
     How many chains, with a starting number below one million, contain exactly sixty non-repeating terms?
 -}
 q074 :: IO Integer
-q074 = pure $ count ((== 60) . factSumChainLength) [0 .. 999999]
+q074 = pure $ count ((== 60) . factSumChainLength) [0 .. 999_999]
   where
     factSum :: Integer -> Integer
     factSum = sum' . map factorial . digits
@@ -1691,11 +1691,11 @@ q074 = pure $ count ((== 60) . factSumChainLength) [0 .. 999999]
     Given that L is the length of the wire, for how many values of L <= 1500000 can exactly one integer sided right angle triangle be formed?
 -}
 q075 :: IO Integer
-q075 = pure . count ((<= 1500000) . FX.sum') $ pythagsHypOptimized 1500000
+q075 = pure . count ((<= 1_500_000) . FX.sum') $ pythagsHypOptimized 1_500_000
   where
     primPythagsOptimized :: [[V3 Integer]] -> [[V3 Integer]]
     primPythagsOptimized vss@(vs : _) =
-        case filter ((<= 1500000) . FX.sum') (concatMap children vs) of
+        case filter ((<= 1_500_000) . FX.sum') (concatMap children vs) of
             [] -> vss
             ws -> primPythagsOptimized (sortOn (^. _z) ws : vss)
 
@@ -1760,7 +1760,7 @@ q077 = pure . fromIntegral . head $ dropWhile ((< 5000) . count primePartition .
     Find the least value of n for which p(n) is divisible by one million.
 -}
 q078 :: IO Integer
-q078 = pure . fromIntegral . head $ dropWhile (((<= 1000000) ||^ ((/= 0) . (`mod` 1000000))) . countPartitions) [1 ..]
+q078 = pure . fromIntegral . head $ dropWhile (((<= 1_000_000) ||^ ((/= 0) . (`mod` 1_000_000))) . countPartitions) [1 ..]
 
 {- |
     A common security method used for online banking is to ask the user for three random characters from a passcode. For example, if the passcode was 531278, they may ask for the 2nd, 3rd, and 5th characters; the expected reply would be: 317.
@@ -1957,92 +1957,3 @@ q099 = fst . head . sortOn (Down . snd) . zip [1 ..] <$> in099
   where
     in099 :: IO [Double]
     in099 = map ((\[x,y] -> read y * log (read x)) . splitOn ",") . lines <$> readFile "./Inputs/099.txt"
-
--- | is there a better way to do this...?
-q :: Integer -> IO Integer
-q = \case
-    1 -> q001
-    2 -> q002
-    3 -> q003
-    4 -> q004
-    5 -> q005
-    6 -> q006
-    7 -> q007
-    8 -> q008
-    9 -> q009
-    10 -> q010
-    11 -> q011
-    12 -> q012
-    13 -> q013
-    14 -> q014
-    15 -> q015
-    16 -> q016
-    17 -> q017
-    18 -> q018
-    19 -> q019
-    20 -> q020
-    21 -> q021
-    22 -> q022
-    23 -> q023
-    24 -> q024
-    25 -> q025
-    26 -> q026
-    27 -> q027
-    28 -> q028
-    29 -> q029
-    30 -> q030
-    31 -> q031
-    32 -> q032
-    33 -> q033
-    34 -> q034
-    35 -> q035
-    36 -> q036
-    37 -> q037
-    38 -> q038
-    39 -> q039
-    40 -> q040
-    41 -> q041
-    42 -> q042
-    43 -> q043
-    44 -> q044
-    45 -> q045
-    46 -> q046
-    47 -> q047
-    48 -> q048
-    49 -> q049
-    50 -> q050
-    51 -> q051
-    52 -> q052
-    53 -> q053
-    54 -> q054
-    55 -> q055
-    56 -> q056
-    57 -> q057
-    58 -> q058
-    59 -> q059
-    60 -> q060
-    61 -> q061
-    62 -> q062
-    63 -> q063
-    64 -> q064
-    65 -> q065
-    66 -> q066
-    67 -> q067
-    68 -> q068
-    69 -> q069
-    70 -> q070
-    71 -> q071
-    72 -> q072
-    73 -> q073
-    74 -> q074
-    75 -> q075
-    76 -> q076
-    77 -> q077
-    78 -> q078
-    79 -> q079
-    80 -> q080
-    90 -> q090
-    92 -> q092
-    96 -> q096
-    99 -> q099
-    _  -> error "that's it so far"
