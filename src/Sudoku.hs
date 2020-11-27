@@ -2,7 +2,7 @@ module Sudoku where
 
 import Control.Applicative (Alternative ((<|>)))
 import Control.Lens ((^.))
-import Data.List.Extra (chunksOf, intercalate, intersperse, maximumOn, minimumOn, nubOrd, (\\))
+import Data.List.Extra (chunksOf, intercalate, maximumOn, minimumOn, nubOrd, (\\))
 import Data.Map (Map, (!))
 import Data.Map qualified as Map
 import FunctionExtra (twoDimListToMap)
@@ -32,7 +32,7 @@ solve' (V2 9 y) s = solve' (V2 0 (y + 1)) s
 solve' (V2 _ 9) s = Just s
 solve' v@(V2 x y) s = case s ! v of
     0 -> solve'' v s (options v s)
-    k -> solve' (V2 (x + 1) y) s
+    _ -> solve' (V2 (x + 1) y) s
   where
     solve'' :: V2 Int -> Sudoku -> [Int] -> Maybe Sudoku
     solve'' _ _ [] = Nothing
@@ -50,4 +50,4 @@ displayMap f m =
      in chunksOf (cmax - cmin + 1) . concat . Map.elems $ foldr (\k g -> Map.insert k (f $ m Map.!? k) g) Map.empty $ V2 <$> [rmin .. rmax] <*> [cmin .. cmax]
 
 displaySudoku :: Maybe Sudoku -> [String]
-displaySudoku = maybe [""] $ concat . intersperse ["---+---+---"] . chunksOf 3 . map (intercalate "|" . chunksOf 3) . displayMap (maybe "" show)
+displaySudoku = maybe [""] $ intercalate ["---+---+---"] . chunksOf 3 . map (intercalate "|" . chunksOf 3) . displayMap (maybe "" show)

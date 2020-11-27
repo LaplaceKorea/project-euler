@@ -112,5 +112,4 @@ q = \case
     92 -> q092
     96 -> q096
     99 -> q099
-    127 -> q127
     _ -> error "that's it so far"
