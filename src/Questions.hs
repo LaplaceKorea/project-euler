@@ -5,7 +5,6 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeSynonymInstances #-}
 
-
 module Questions where
 
 import CalendarExtra (
@@ -40,7 +39,7 @@ import Sudoku (Sudoku, solve, sudoku)
 import Test.FitSpec.Utils (contained, subsets)
 
 pattern (:%) :: b -> b -> Ratio b
-pattern num :% denom <- ((\x -> (numerator x, denominator x)) -> (num, denom))
+pattern num :% denom <- ((numerator &&& denominator) -> (num, denom))
 
 {- |
     If we list all the natural numbers below 10 that are multiples of 3 or 5,
@@ -358,41 +357,42 @@ q017 = pure . genericLength $ concatMap getWord [1 .. 1000]
   where
     getWord :: Integer -> String
     getWord = \case
-        0    -> ""
-        1    -> "One"
-        2    -> "Two"
-        3    -> "Three"
-        4    -> "Four"
-        5    -> "Five"
-        6    -> "Six"
-        7    -> "Seven"
-        8    -> "Eight"
-        9    -> "Nine"
-        10   -> "Ten"
-        11   -> "Eleven"
-        12   -> "Twelve"
-        13   -> "Thirteen"
-        14   -> "Fourteen"
-        15   -> "Fifteen"
-        16   -> "Sixteen"
-        17   -> "Seventeen"
-        18   -> "Eighteen"
-        19   -> "Nineteen"
+        0 -> ""
+        1 -> "One"
+        2 -> "Two"
+        3 -> "Three"
+        4 -> "Four"
+        5 -> "Five"
+        6 -> "Six"
+        7 -> "Seven"
+        8 -> "Eight"
+        9 -> "Nine"
+        10 -> "Ten"
+        11 -> "Eleven"
+        12 -> "Twelve"
+        13 -> "Thirteen"
+        14 -> "Fourteen"
+        15 -> "Fifteen"
+        16 -> "Sixteen"
+        17 -> "Seventeen"
+        18 -> "Eighteen"
+        19 -> "Nineteen"
         1000 -> "OneThousand"
-        n -> if
-            | n >= 100 ->
-                getWord (n `div` 100) ++ "Hundred"
-                    ++ if (n `mod` 100) == 0
-                       then ""
-                       else "and"  ++ getWord (n `mod` 100)
-            | n >= 90 -> "Ninety"  ++ getWord (n - 90)
-            | n >= 80 -> "Eighty"  ++ getWord (n - 80)
-            | n >= 70 -> "Seventy" ++ getWord (n - 70)
-            | n >= 60 -> "Sixty"   ++ getWord (n - 60)
-            | n >= 50 -> "Fifty"   ++ getWord (n - 50)
-            | n >= 40 -> "Forty"   ++ getWord (n - 40)
-            | n >= 30 -> "Thirty"  ++ getWord (n - 30)
-            | n >= 20 -> "Twenty"  ++ getWord (n - 20)
+        n ->
+            if
+                    | n >= 100 ->
+                        getWord (n `div` 100) ++ "Hundred"
+                            ++ if (n `mod` 100) == 0
+                                then ""
+                                else "and" ++ getWord (n `mod` 100)
+                    | n >= 90 -> "Ninety" ++ getWord (n - 90)
+                    | n >= 80 -> "Eighty" ++ getWord (n - 80)
+                    | n >= 70 -> "Seventy" ++ getWord (n - 70)
+                    | n >= 60 -> "Sixty" ++ getWord (n - 60)
+                    | n >= 50 -> "Fifty" ++ getWord (n - 50)
+                    | n >= 40 -> "Forty" ++ getWord (n - 40)
+                    | n >= 30 -> "Thirty" ++ getWord (n - 30)
+                    | n >= 20 -> "Twenty" ++ getWord (n - 20)
 
 {- |
     By starting at the top of the triangle below and moving to adjacent numbers on the row below, the maximum total from top to bottom is 23.
@@ -1017,13 +1017,14 @@ q050 =
       where
         consecutivePrimeSums' n k =
             if primes !! max 0 (fromIntegral n) > 1_000_000
-            then []
-            else let m = sum (genericTake k $ genericDrop n primes)
-                  in if
-                    | m <= 1_000_000 && isPrime m ->
-                        (primes !! fromIntegral n, k, m) : consecutivePrimeSums' n (k + 1)
-                    | m <= 1_000_000 -> consecutivePrimeSums' n (k + 1)
-                    | otherwise -> consecutivePrimeSums' (n + 1) 1
+                then []
+                else
+                    let m = sum (genericTake k $ genericDrop n primes)
+                     in if
+                                | m <= 1_000_000 && isPrime m ->
+                                    (primes !! fromIntegral n, k, m) : consecutivePrimeSums' n (k + 1)
+                                | m <= 1_000_000 -> consecutivePrimeSums' n (k + 1)
+                                | otherwise -> consecutivePrimeSums' (n + 1) 1
 
 {- |
     By replacing the first digit of the 2-digit number #3, it turns out that six of the nine possible values: 13, 23, 43, 53, 73, and 83, are all prime.
@@ -1600,14 +1601,14 @@ q071 = pure . numerator $ mediant 0 1 (3 % 7) 1_000_000
     mediant (a :% b) (c :% d) comp limit =
         let m = (a + c) % (b + d)
          in if
-            | b + d >= limit -> m
-            | c % d == comp ->
-                let diff = limit - (b + d)
-                    rept = 1 + (diff `div` d)
-                    in (a + rept * c) % (b + rept * d)
-            | otherwise -> case compare m comp of
-                LT -> mediant m (c % d) comp limit
-                _ -> mediant (a % b) m comp limit
+                    | b + d >= limit -> m
+                    | c % d == comp ->
+                        let diff = limit - (b + d)
+                            rept = 1 + (diff `div` d)
+                         in (a + rept * c) % (b + rept * d)
+                    | otherwise -> case compare m comp of
+                        LT -> mediant m (c % d) comp limit
+                        _ -> mediant (a % b) m comp limit
 
 {- |
     Consider the fraction, n\/d, where n and d are positive integers. If n < d and gcd(n, d) = 1, it is called a reduced proper fraction.
@@ -1855,7 +1856,7 @@ q081 = pure 0
     How many distinct arrangements of the two cubes allow for all of the square numbers to be displayed?
 -}
 q090 :: IO Integer
-q090 = pure . genericLength . nubOrdOn (\(xs, ys) -> sort [xs, ys]) $ [ (xs, ys) | xs <- sixDigitLists, ys <- sixDigitLists, (makesAllSquares `on` represented) xs ys ]
+q090 = pure . genericLength . nubOrdOn (\(xs, ys) -> sort [xs, ys]) $ [(xs, ys) | xs <- sixDigitLists, ys <- sixDigitLists, (makesAllSquares `on` represented) xs ys]
   where
     represented :: [Integer] -> [Integer]
     represented xs
@@ -1901,7 +1902,7 @@ q092 = pure $ sumOn' multinomial $ filter unhappy orderedSevens
     unhappy = (firstSqSums !) . subtract 1 . fromIntegral . sqSum
 
     sqSum :: Integer -> Integer
-    sqSum = sumOn' (^2) . digits
+    sqSum = sumOn' (^ 2) . digits
 
     reaches89 :: Integer -> Bool
     reaches89 = ((> 1) &&^ ((== 89) ||^ reaches89)) . sqSum
@@ -1956,4 +1957,4 @@ q099 :: IO Integer
 q099 = fst . head . sortOn (Down . snd) . zip [1 ..] <$> in099
   where
     in099 :: IO [Double]
-    in099 = map ((\[x,y] -> read y * log (read x)) . splitOn ",") . lines <$> readFile "./Inputs/099.txt"
+    in099 = map ((\[x, y] -> read y * log (read x)) . splitOn ",") . lines <$> readFile "./Inputs/099.txt"
