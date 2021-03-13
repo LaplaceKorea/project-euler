@@ -28,15 +28,13 @@ dependencies:
   - data-default-class
   - deepseq
   - exact-combinatorics
-  - extra
-  - fitspec
-  - ghc
   - lens
   - linear
   - mtl
   - numbers
   - primes
   - time
+  - toolbox
   - vector
 
 default-extensions:

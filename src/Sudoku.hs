@@ -2,9 +2,12 @@ module Sudoku where
 
 import Control.Applicative (Alternative ((<|>)))
 import Control.Lens ((^.))
-import Data.List.Extra (chunksOf, intercalate, maximumOn, minimumOn, nubOrd, (\\))
+import Data.Foldable.Toolbox (maximumOf, minimumOf)
+import Data.List.Toolbox (chunksOf, intercalate, (\\))
 import Data.Map (Map, (!))
 import Data.Map qualified as Map
+import Data.Maybe (fromMaybe)
+import Data.Set qualified as Set
 import FunctionExtra (twoDimListToMap)
 import Linear
 
@@ -24,7 +27,7 @@ col (V2 x _) m = filter (/= 0) . map (m !) $ V2 <$> [x] <*> [0 .. 8]
 
 options :: V2 Int -> Sudoku -> [Int]
 options v s = case s ! v of
-    0 -> [1 .. 9] \\ nubOrd (box v s ++ row v s ++ col v s)
+    0 -> [1 .. 9] \\ (Set.toList . Set.fromList) (box v s ++ row v s ++ col v s)
     _ -> []
 
 solve' :: V2 Int -> Sudoku -> Maybe Sudoku
@@ -43,10 +46,10 @@ solve = solve' $ V2 0 0
 
 displayMap :: (Maybe a -> String) -> Map (V2 Int) a -> [String]
 displayMap f m =
-    let rmin = (^. _x) . minimumOn (^. _x) $ Map.keys m
-        rmax = (^. _x) . maximumOn (^. _x) $ Map.keys m
-        cmin = (^. _y) . minimumOn (^. _y) $ Map.keys m
-        cmax = (^. _y) . maximumOn (^. _y) $ Map.keys m
+    let rmin = fromMaybe 0 . minimumOf (^. _x) $ Map.keys m
+        rmax = fromMaybe 0 . maximumOf (^. _x) $ Map.keys m
+        cmin = fromMaybe 0 . minimumOf (^. _y) $ Map.keys m
+        cmax = fromMaybe 0 . maximumOf (^. _y) $ Map.keys m
      in chunksOf (cmax - cmin + 1) . concat . Map.elems $ foldr (\k g -> Map.insert k (f $ m Map.!? k) g) Map.empty $ V2 <$> [rmin .. rmax] <*> [cmin .. cmax]
 
 displaySudoku :: Maybe Sudoku -> [String]
