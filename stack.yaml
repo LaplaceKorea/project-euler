@@ -42,7 +42,7 @@ packages:
 extra-deps:
   - combinat-0.2.9.0@sha256:3daed23a2376f8d9903dc2c1c3758f1f2a0527178c81023080507e5f5ddf5b7a,5107
   - git: https://github.com/bi-functor/toolbox.git
-    commit: b39135c1fe5ba4deb71b462c6b7d8ee0d9707401
+    commit: 1787f06eb1ea74a8bae293db66ea023bf93e63fa
 # Override default flag values for local packages and extra-deps
 # flags: {}
 
