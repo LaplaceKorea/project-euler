@@ -1,2 +1,10 @@
 cradle:
   stack:
+    - path: "./src"
+      component: "project-euler:lib"
+
+    - path: "./app/Main.hs"
+      component: "project-euler:exe:project-euler-exe"
+
+    - path: "./app/Paths_project_euler.hs"
+      component: "project-euler:exe:project-euler-exe"

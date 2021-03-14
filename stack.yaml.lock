@@ -17,11 +17,11 @@ packages:
     git: https://github.com/bi-functor/toolbox.git
     pantry-tree:
       size: 1943
-      sha256: eb16a4b46f6ef6a3207f416e01de4a17884c7bda44b1a4b4177b2ec4e6f2f980
-    commit: 1b61bf7d3cb27d12a74d4b3673a2ae7447b2d8d3
+      sha256: a6dfc6732d39dbfccf47a812a7f019da1aa23fa2c660d63c388001e336585fae
+    commit: b39135c1fe5ba4deb71b462c6b7d8ee0d9707401
   original:
     git: https://github.com/bi-functor/toolbox.git
-    commit: 1b61bf7d3cb27d12a74d4b3673a2ae7447b2d8d3
+    commit: b39135c1fe5ba4deb71b462c6b7d8ee0d9707401
 snapshots:
 - completed:
     size: 565266

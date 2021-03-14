@@ -22,6 +22,7 @@ import Data.Maybe (fromMaybe, listToMaybe, mapMaybe)
 import Data.Number.BigFloat (BigFloat)
 import Data.Number.Fixed (Prec500)
 import Data.Ord (Down (Down))
+import Data.Polynomial qualified as Poly
 import Data.Set (Set)
 import Data.Set qualified as Set
 import Data.Time (DayOfWeek (Sunday), dayOfWeek, fromGregorian)
@@ -29,7 +30,7 @@ import Data.Tuple.Toolbox (fst3, second3, snd3, thd3, (&&&))
 import Data.Vector (Vector, (!))
 import Data.Vector qualified as Vector
 import Data.Word (Word32)
-import FunctionExtra (subsets, takeWhileUniqueOrd, twoDimListToMap)
+import FunctionExtra (twoDimListToMap)
 import GHC.Real (Ratio ((:%)))
 import Math.Combinat.Partitions.Integer (Partition, countPartitions, fromPartition, partitions)
 import NumbersExtra
@@ -641,7 +642,7 @@ q030 = pure . sum $ filter (narcissistic 5) [2 .. 1_000_000]
     How many different ways can £2 be made using any number of coins?
 -}
 q031 :: IO Integer
-q031 = pure $ numPartitionsUsing [1, 2, 5, 10, 20, 50, 100, 200] 200
+q031 = pure . fromIntegral $ Poly.countIntegerPartitionsWith [1, 2, 5, 10, 20, 50, 100, 200] 200
 
 {- |
     We shall say that an n-digit number is pandigital if it makes use of all the digits 1 to n exactly once. For example, the 5-digit number, 15234, is 1 through 5 pandigital.
@@ -1860,7 +1861,7 @@ q090 = pure . genericLength . Set.toList . Set.fromList . map (\(xs, ys) -> sort
         | otherwise = xs
 
     sixDigitLists :: [[Integer]]
-    sixDigitLists = Set.toList . Set.fromList . filter ((== 6) . length) $ subsets [0 .. 9]
+    sixDigitLists = Set.toList . Set.fromList . filter ((== 6) . length) $ sublists [0 .. 9]
 
     makesAllSquares :: [Integer] -> [Integer] -> Bool
     makesAllSquares xs ys = and $ elem <$> [(0, 1), (0, 4), (0, 9), (1, 6), (2, 5), (3, 6), (4, 9), (6, 4), (8, 1)] <*> [((,) <$> xs <*> ys) ++ ((,) <$> ys <*> xs)]

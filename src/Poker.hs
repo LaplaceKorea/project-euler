@@ -1,11 +1,10 @@
 module Poker (in054) where
 
 import Data.Function (on)
-import Data.List.Toolbox (elemIndex, groupOn, sort, sortOn, (\\))
+import Data.List.Toolbox (elemIndex, groupOn, sort, sortOn, sublists, (\\))
 import Data.Maybe (fromJust)
 import Data.Ord (Down (Down))
 import Data.Tuple.Toolbox (both)
-import FunctionExtra (subsets)
 import System.IO.Unsafe (unsafePerformIO)
 
 data CardValue
@@ -135,19 +134,19 @@ strFlush :: Poker -> Bool
 strFlush = (&&) <$> sameSuit <*> straight
 
 fourKind :: Poker -> Bool
-fourKind = any sameValue . filter ((== 4) . length) . subsets
+fourKind = any sameValue . filter ((== 4) . length) . sublists
 
 threeKind :: Poker -> Bool
-threeKind = any sameValue . filter ((== 3) . length) . subsets
+threeKind = any sameValue . filter ((== 3) . length) . sublists
 
 twoPairs :: Poker -> Bool
-twoPairs h = any (pair . (h \\)) . filter sameValue . filter ((== 2) . length) $ subsets h
+twoPairs h = any (pair . (h \\)) . filter sameValue . filter ((== 2) . length) $ sublists h
 
 pair :: Poker -> Bool
-pair = any sameValue . filter ((== 2) . length) . subsets
+pair = any sameValue . filter ((== 2) . length) . sublists
 
 fullHouse :: Poker -> Bool
-fullHouse h = (threeKind h &&) . pair . (h \\) . head . filter sameValue . filter ((== 3) . length) $ subsets h
+fullHouse h = (threeKind h &&) . pair . (h \\) . head . filter sameValue . filter ((== 3) . length) $ sublists h
 
 hand :: Poker -> PokerHand
 hand h@[a, b, c, d, e]

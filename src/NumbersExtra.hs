@@ -4,7 +4,6 @@ module NumbersExtra (
     module Data.List.Toolbox,
     module Data.Ratio,
     module Linear,
-    module Polynomials,
     isPrime,
     primes,
     primeFactors,
@@ -61,6 +60,7 @@ import Control.Monad.Toolbox hiding (unit)
 import Data.Foldable.Toolbox qualified as FX
 import Data.List.Toolbox hiding (cons, snoc, uncons, unsnoc)
 import Data.Numbers.Primes qualified as P
+-- import Math.Combinat.Partitions.Integer
 import Data.Ratio (
     Ratio,
     Rational,
@@ -73,11 +73,9 @@ import Data.Set (Set)
 import Data.Set qualified as Set
 import Data.Tuple.Toolbox ((&&&))
 import Linear hiding (transpose)
--- import Math.Combinat.Partitions.Integer
 import Math.Combinatorics.Exact.Binomial qualified as B
 import Math.Combinatorics.Exact.Factorial qualified as F
 import Math.NumberTheory.Primes.Testing (isPrime)
-import Polynomials
 
 primes :: [Integer]
 primes = P.primes :: [Integer]

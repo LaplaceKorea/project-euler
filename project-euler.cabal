@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 484ff8baa66efbc5b49c61bae12b7c88fdb9063c299ae81a76775cf40fba952f
+-- hash: 26a17a1e26fa6744fd488917ca8ec969e8f2b33dbc04888ef222a7290e94254f
 
 name:           project-euler
 version:        0.1.1.0
@@ -27,10 +27,10 @@ source-repository head
 
 library
   exposed-modules:
+      Data.Polynomial
       FunctionExtra
       NumbersExtra
       Poker
-      Polynomials
       Questions
       Sudoku
   other-modules:
