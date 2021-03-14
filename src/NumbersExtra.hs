@@ -1,7 +1,4 @@
 module NumbersExtra (
-    module Control.Monad.Toolbox,
-    module Control.Lens,
-    module Data.List.Toolbox,
     module Data.Ratio,
     module Linear,
     isPrime,
@@ -17,7 +14,6 @@ module NumbersExtra (
     hexagons,
     heptagons,
     octagons,
-    -- , ngonal, triangular, quadrilateral, pentagonal, hexagonal, heptagonal, octagonal
     fibonaccis,
     fibonacciFrom,
     digits,
@@ -55,20 +51,12 @@ module NumbersExtra (
     pairwiseSequential,
 ) where
 
-import Control.Lens
-import Control.Monad.Toolbox hiding (unit)
+import Control.Lens ((^.))
 import Data.Foldable.Toolbox qualified as FX
 import Data.List.Toolbox hiding (cons, snoc, uncons, unsnoc)
 import Data.Numbers.Primes qualified as P
 -- import Math.Combinat.Partitions.Integer
-import Data.Ratio (
-    Ratio,
-    Rational,
-    approxRational,
-    denominator,
-    numerator,
-    (%),
- )
+import Data.Ratio
 import Data.Set (Set)
 import Data.Set qualified as Set
 import Data.Tuple.Toolbox ((&&&))
@@ -142,7 +130,7 @@ pairwise f (x : y : xs) = f x y : pairwise f (y : xs)
 pairwise _ xs = xs
 
 palindrome :: (Integral a, Read a, Show a, Eq a) => a -> Bool
-palindrome = ap (==) backward
+palindrome = (==) <*> backward
 
 -- | Does the number contain each digit from 0 to its length?
 pandigital0 :: Integer -> Bool

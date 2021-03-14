@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 26a17a1e26fa6744fd488917ca8ec969e8f2b33dbc04888ef222a7290e94254f
+-- hash: e1846a1908666585a5215ccf679d9a83695285c172b118d7c977d2d445f5f099
 
 name:           project-euler
 version:        0.1.1.0
@@ -44,7 +44,6 @@ library
     , base
     , combinat
     , containers
-    , data-default-class
     , deepseq
     , exact-combinatorics
     , lens
@@ -71,7 +70,6 @@ executable project-euler-exe
     , base
     , combinat
     , containers
-    , data-default-class
     , deepseq
     , exact-combinatorics
     , lens

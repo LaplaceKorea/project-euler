@@ -7,15 +7,17 @@
 
 module Questions where
 
-import Data.Bifunctor
+import Control.Lens (Identity (..), none, toListOf, (^.))
+import Control.Monad.Toolbox ((&^&), (|^|))
 import Data.Bits (Bits (xor))
 import Data.Bits.Lens (bits)
 import Data.Char (chr, isAlpha, isDigit, isSpace, ord)
-import Data.Foldable.Toolbox qualified as FX
+import Data.Foldable.Toolbox hiding (genericLength)
 import Data.Function (on)
 import Data.Function.Toolbox (using)
 import Data.List.NonEmpty.Toolbox (NonEmpty (..))
 import Data.List.NonEmpty.Toolbox qualified as NE
+import Data.List.Toolbox
 import Data.Map.Strict (Map, (!?))
 import Data.Map.Strict qualified as Map
 import Data.Maybe (fromMaybe, listToMaybe, mapMaybe)
@@ -26,7 +28,7 @@ import Data.Polynomial qualified as Poly
 import Data.Set (Set)
 import Data.Set qualified as Set
 import Data.Time (DayOfWeek (Sunday), dayOfWeek, fromGregorian)
-import Data.Tuple.Toolbox (fst3, second3, snd3, thd3, (&&&))
+import Data.Tuple.Toolbox (first, fst3, second, second3, snd3, thd3, (&&&))
 import Data.Vector (Vector, (!))
 import Data.Vector qualified as Vector
 import Data.Word (Word32)
@@ -573,7 +575,7 @@ q026 = pure . NE.maximumOn1 (snd . reciprocalWithCycleLength 1 []) $ 1 :| [2 .. 
 q027 :: IO Integer
 q027 =
     pure . uncurry (*) . fromMaybe (0, 0) $
-        FX.maximumOn
+        maximumOn
             (length . (\(a, b) -> takeWhile (isPrime . (\n -> n * n + a * n + b)) [0 .. 80]))
             [(a, b) | b <- takeWhile (<= 1000) primes, a <- [- (b -2), - (b -4) .. 0]]
 
@@ -692,7 +694,7 @@ q033 = pure . denominator . product . map (uncurry (%)) $ filter (uncurry curiou
     /Note: as 1! = 1 and 2! = 2 are not sums they are not included./
 -}
 q034 :: IO Integer
-q034 = pure . sum $ filter ((==) <*> (FX.sumOn (factorial . fromIntegral) . digits)) [3 .. 100_000]
+q034 = pure . sum $ filter ((==) <*> (sumOn (factorial . fromIntegral) . digits)) [3 .. 100_000]
 
 {- |
     The number, 197, is called a /circular prime/ because all rotations of the digits: 197, 971, and 719, are themselves prime.
@@ -707,7 +709,7 @@ q035 :: IO Integer
 q035 = pure . genericCount circularPrime $ takeWhile (< 1_000_000) primes
   where
     circularPrime :: Integer -> Bool
-    circularPrime = (FX.notNull &^& all isPrime) . uncurry take . (length . digits &&& cyclize)
+    circularPrime = (notNull &^& all isPrime) . uncurry take . (length . digits &&& cyclize)
 
     cyclize :: Integer -> [Integer]
     cyclize n
@@ -782,7 +784,7 @@ q038 = pure . maximum . filter pandigital1 $ map catProd [1 .. 10_000]
     For which value of p <= 1000, is the number of solutions maximised?
 -}
 q039 :: IO Integer
-q039 = pure . sum . head . fromMaybe [] . FX.maximumOn length $ filter ((<= 1000) . sum . head) tris
+q039 = pure . sum . head . fromMaybe [] . maximumOn length $ filter ((<= 1000) . sum . head) tris
   where
     tris :: [[V3 Integer]]
     tris = groupSortOn sum $ take 500 pythags
@@ -1004,7 +1006,7 @@ q049 = pure . read . concatMap show . head . Set.toList . Set.fromList . concat 
 -}
 q050 :: IO Integer
 q050 =
-    pure . maybe 0 thd3 . FX.maximumOn snd3
+    pure . maybe 0 thd3 . maximumOn snd3
         . take 10 -- ! the longest chain likely starts from one of the smallest primes!
         $ mapMaybe safeLast consecutivePrimeSums
   where
@@ -1048,7 +1050,7 @@ q051 = pure . head $ filter (\n -> (>= 8) . length . filter isPrime . replaceDig
         replaceDigits' :: Integer -> [Integer] -> [Integer] -> [Integer]
         replaceDigits' n ks ls =
             let n' = Vector.fromList (digits n)
-             in map (undigits . FX.toList . (n' Vector.//)) . groupSortOn snd $ (,) <$> map fromIntegral ks <*> ls
+             in map (undigits . toList . (n' Vector.//)) . groupSortOn snd $ (,) <$> map fromIntegral ks <*> ls
 
     sixDigitPrimes :: [Integer]
     sixDigitPrimes = takeWhile ((== 6) . length . digits) $ dropWhile ((< 6) . length . digits) primes
@@ -1248,7 +1250,7 @@ q059 = do
     Find the lowest sum for a set of five primes for which any two primes concatenate to produce another prime.
 -}
 q060 :: IO Integer
-q060 = pure . maybe 0 sum $ FX.minimumOn sum fiveConcatenablePrimes
+q060 = pure . maybe 0 sum $ minimumOn sum fiveConcatenablePrimes
   where
     primeBound :: [Integer]
     primeBound = takeWhile (<= 10_000) primes
@@ -1342,7 +1344,7 @@ q061 = pure . sum . head . (Set.toList . Set.fromList) . filter cyclic . map (ma
     Find the smallest cube for which exactly five permutations of its digits are cube.
 -}
 q062 :: IO Integer
-q062 = pure . maybe 0 (^ 3) . FX.minimumOf fst . Map.elems $ Map.filter ((== 5) . snd) cubesByLargestPerm
+q062 = pure . maybe 0 (^ 3) . minimumOf fst . Map.elems $ Map.filter ((== 5) . snd) cubesByLargestPerm
   where
     biggestCubePerm :: Integer -> Integer
     biggestCubePerm = undigits . sortOn Down . digits . (^ 3)
@@ -1459,7 +1461,7 @@ q065 = pure . sum . digits . numerator $ cfConvergents (2 : concat [[1, 2 * k, 1
     Find the value of D <= 1000 in minimal solutions of x for which the largest value of x is obtained.
 -}
 q066 :: IO Integer
-q066 = pure . maybe 0 fst3 . FX.maximumOn snd3 $ mapMaybe pellSolution [1 .. 1000]
+q066 = pure . maybe 0 fst3 . maximumOn snd3 $ mapMaybe pellSolution [1 .. 1000]
   where
     pellSolution :: Integer -> Maybe (Integer, Integer, Integer)
     pellSolution n = listToMaybe [(n, x, y) | (x :% y) <- cfConvergents $ getCF (sqrt (fromIntegral n) :: BigFloat Prec500), x ^ 2 == 1 + n * y ^ 2]
@@ -1519,7 +1521,7 @@ q067 = head . foldr1 algo <$> in067
     Using the numbers 1 to 10, and depending on arrangements, it is possible to form 16- and 17-digit strings. What is the maximum 16-digit string for a "magic" 5-gon ring?
 -}
 q068 :: IO Integer
-q068 = pure . fromMaybe 0 . FX.maximumOf resultString $ filter (sumsEqual &^& lexOrder &^& noMiddleTens) fiveGons
+q068 = pure . fromMaybe 0 . maximumOf resultString $ filter (sumsEqual &^& lexOrder &^& noMiddleTens) fiveGons
   where
     sumsEqual :: Vector Integer -> Bool
     sumsEqual xs = allSame $ map (sum . (<*> [xs])) [[(! 0), (! 1), (! 2)], [(! 3), (! 2), (! 4)], [(! 5), (! 4), (! 6)], [(! 7), (! 6), (! 8)], [(! 9), (! 8), (! 1)]]
@@ -1565,7 +1567,7 @@ q068 = pure . fromMaybe 0 . FX.maximumOf resultString $ filter (sumsEqual &^& le
     Find the value of n <= 1000000 for which n\/φ(n) is a maximum.
 -}
 q069 :: IO Integer
-q069 = pure . fromMaybe 0 $ FX.maximumOn (((/) `on` fromIntegral) <$> id <*> totient) [1 .. 1_000_000]
+q069 = pure . fromMaybe 0 $ maximumOn (((/) `on` fromIntegral) <$> id <*> totient) [1 .. 1_000_000]
 
 {- |
     Euler's Totient function, φ(n), is used to determine the number of numbers less than n which are relatively prime to n. For example, as 1, 2, 4, 5, 7, and 8, are all less than nine and relatively prime to nine, φ(9) = 6.
@@ -1577,7 +1579,7 @@ q069 = pure . fromMaybe 0 $ FX.maximumOn (((/) `on` fromIntegral) <$> id <*> tot
     Find the value of n, 1 < n < 10^7, for which φ(n) is a permutation of n and the ratio n\/φ(n) produces a minimum.
 -}
 q070 :: IO Integer
-q070 = pure . maybe 0 fst $ FX.minimumOn (uncurry ((/) `on` fromIntegral)) [(x, totient x) | x <- [2 .. 10 ^ 7 -1], sort (show $ totient x) == sort (show x)]
+q070 = pure . maybe 0 fst $ minimumOn (uncurry ((/) `on` fromIntegral)) [(x, totient x) | x <- [2 .. 10 ^ 7 -1], sort (show $ totient x) == sort (show x)]
 
 {- |
     Consider the fraction, n\/d, where n and d are positive integers. If n < d and gcd(n, d) = 1, it is called a reduced proper fraction.
@@ -1618,7 +1620,7 @@ q071 = pure . numerator $ mediant 0 1 (3 % 7) 1_000_000
     How many elements would be contained in the set of reduced proper fractions for d <= 1000000?
 -}
 q072 :: IO Integer
-q072 = pure $ FX.sumOn totient [2 .. 1_000_000]
+q072 = pure $ sumOn totient [2 .. 1_000_000]
 
 {- |
     Consider the fraction, n\/d, where n and d are positive integers. If n < d and gcd(n, d) = 1, it is called a reduced proper fraction.
@@ -1781,7 +1783,7 @@ q079 = code [] <$> in079
     newPWs :: [[Integer]] -> [[Integer]]
     newPWs ps =
         let d = firstDigit ps
-         in filter FX.notNull $ map (\p -> if take 1 p == [d] then drop 1 p else p) ps
+         in filter notNull $ map (\p -> if take 1 p == [d] then drop 1 p else p) ps
 
     code :: [Integer] -> [[Integer]] -> Integer
     code acc [] = undigits acc
@@ -1795,7 +1797,7 @@ q079 = code [] <$> in079
     For the first one hundred natural numbers, find the total of the digital sums of the first one hundred decimal digits for all the irrational square roots.
 -}
 q080 :: IO Integer
-q080 = pure . FX.sumOn (sum . first100 . sqrt') $ [1 .. 100] \\ takeWhile (<= 100) squares
+q080 = pure . sumOn (sum . first100 . sqrt') $ [1 .. 100] \\ takeWhile (<= 100) squares
   where
     sqrt' :: Integer -> BigFloat Prec500
     sqrt' = sqrt . fromIntegral
@@ -1830,7 +1832,7 @@ q081 = pure 0
     foldMatrix :: (V2 Int, Integer) -> Map (V2 Int) Integer -> Integer
     foldMatrix (V2 0 0, s) m = s + m Map.! V2 0 0
     foldMatrix (v, s) m =
-        let v' = fromMaybe 0 $ FX.minimumOn (m Map.!) (vectorChain v)
+        let v' = fromMaybe 0 $ minimumOn (m Map.!) (vectorChain v)
          in foldMatrix (v', s + m Map.! v) m
 
 {- |
@@ -1877,10 +1879,10 @@ q090 = pure . genericLength . Set.toList . Set.fromList . map (\(xs, ys) -> sort
     How many starting numbers below ten million will arrive at 89?
 -}
 q092 :: IO Integer
-q092 = pure $ FX.sumOn multinomial $ filter unhappy orderedSevens
+q092 = pure $ sumOn multinomial $ filter unhappy orderedSevens
   where
     multinomial :: Integer -> Integer
-    multinomial = (div <$> factorial . genericLength <*> FX.productOn (factorial . genericLength) . group) . (\xs@(length -> x) -> if x < 7 then replicate (7 - x) 0 ++ xs else xs) . sort . digits
+    multinomial = (div <$> factorial . genericLength <*> productOn (factorial . genericLength) . group) . (\xs@(length -> x) -> if x < 7 then replicate (7 - x) 0 ++ xs else xs) . sort . digits
 
     orderedSevens :: [Integer]
     orderedSevens =
@@ -1898,7 +1900,7 @@ q092 = pure $ FX.sumOn multinomial $ filter unhappy orderedSevens
     unhappy = (firstSqSums !) . subtract 1 . fromIntegral . sqSum
 
     sqSum :: Integer -> Integer
-    sqSum = FX.sumOn (^ 2) . digits
+    sqSum = sumOn (^ 2) . digits
 
     reaches89 :: Integer -> Bool
     reaches89 = ((> 1) &^& ((== 89) |^| reaches89)) . sqSum
@@ -1935,7 +1937,7 @@ q093 = pure 0
     By solving all fifty puzzles find the sum of the 3-digit numbers found in the top left corner of each solution grid; for example, 483 is the 3-digit number found in the top left corner of the solution grid above.
 -}
 q096 :: IO Integer
-q096 = FX.sumOn (\m -> undigits $ map (fromIntegral . (m Map.!)) [V2 0 0, V2 0 1, V2 0 2]) . map (fromMaybe Map.empty . solve) <$> sudokus
+q096 = sumOn (\m -> undigits $ map (fromIntegral . (m Map.!)) [V2 0 0, V2 0 1, V2 0 2]) . map (fromMaybe Map.empty . solve) <$> sudokus
   where
     sudokus :: IO [Sudoku]
     sudokus = map sudoku . chunksOf 9 . filter (all isDigit) . lines <$> readFile "./Inputs/096.txt"
