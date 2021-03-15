@@ -10,7 +10,6 @@ import Data.List.NonEmpty.Toolbox qualified as NE
 import Data.List.Toolbox (dropWhileEnd, foldl', stripPrefix)
 import Data.Maybe (fromMaybe, mapMaybe)
 import Data.String (IsString (..))
-import Data.Traversable (for)
 
 -- | [a, b, c, ...] <==> a + bx + cx^2 + ...
 newtype Polynomial a = Polynomial {unPolynomial :: NonEmpty a}
@@ -82,8 +81,8 @@ instance (Eq a, Num a) => Num (Polynomial a) where
 
 -- | @'polyQuotRem' as bs == (qs, rs)@ such that @as == qs * bs + rs@ with @deg rs < deg bs@
 polyQuotRem :: (Integral a) => Polynomial a -> Polynomial a -> (Polynomial a, Polynomial a)
-Polynomial as `polyQuotRem` ZeroPoly = error "divide by 0"
-as `polyQuotRem` bs = go (toList as) (toList bs) []
+_ `polyQuotRem` ZeroPoly = error "divide by 0"
+a `polyQuotRem` b = go (toList a) (toList b) []
   where
     go :: (Integral a) => [a] -> [a] -> [a] -> (Polynomial a, Polynomial a)
     go as bs qs = if d < 0 then (mkPolynomial qs, mkPolynomial as) else go as' bs qs'

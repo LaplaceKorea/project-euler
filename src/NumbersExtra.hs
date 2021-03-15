@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -Wno-type-defaults #-}
+
 module NumbersExtra (
     module Data.Ratio,
     module Linear,
@@ -28,6 +30,7 @@ module NumbersExtra (
     numDivisors,
     properDivisors,
     totient,
+    mobius,
     amicable,
     deficient,
     perfect,
@@ -52,8 +55,7 @@ module NumbersExtra (
 ) where
 
 import Control.Lens ((^.))
-import Data.Foldable.Toolbox qualified as FX
-import Data.List.Toolbox hiding (cons, snoc, uncons, unsnoc)
+import Data.List.Toolbox
 import Data.Numbers.Primes qualified as P
 -- import Math.Combinat.Partitions.Integer
 import Data.Ratio
@@ -82,7 +84,7 @@ radical = product . distinctPrimeFactors
 
 -- | `ngons s` generates the `s`-gonal numbers.
 ngons :: Integer -> [Integer]
-ngons s = ngons' s 1 (s - 1)
+ngons sides = ngons' sides 1 (sides - 1)
   where
     ngons' :: Integer -> Integer -> Integer -> [Integer]
     ngons' !s !n !m = n : ngons' s (n + m) (m + s - 2)
@@ -159,10 +161,10 @@ pandigitals1 n
 -- | Find all the divisors of a number.
 divisors :: Integer -> [Integer]
 divisors n =
-    let k = ceiling (sqrt $ fromIntegral n)
+    let k = ceiling (sqrt $ fromIntegral n :: Double)
      in Set.toList . Set.fromList $
             concatMap
-                (\(m, k) -> [m, k])
+                (\(m, j) -> [m, j])
                 [(m, n `div` m) | m <- [1 .. k], n `mod` m == 0]
 
 -- | Find all the divisors of a number, excluding itself.
@@ -264,11 +266,11 @@ cfConvergents [x] = [x % 1]
 cfConvergents (x : y : xs) = x % 1 : cfConvergents' (x * y + 1) y x 1 xs
   where
     cfConvergents' :: Integer -> Integer -> Integer -> Integer -> [Integer] -> [Rational]
-    cfConvergents' pn qn pn1 qn1 [] = [pn % qn]
-    cfConvergents' pn qn pn1 qn1 (x : xs) =
-        let pn' = x * pn + pn1
-            qn' = x * qn + qn1
-         in pn % qn : cfConvergents' pn' qn' pn qn xs
+    cfConvergents' pn qn _ _ [] = [pn % qn]
+    cfConvergents' pn qn pn1 qn1 (z : zs) =
+        let pn' = z * pn + pn1
+            qn' = z * qn + qn1
+         in pn % qn : cfConvergents' pn' qn' pn qn zs
 
 getCF :: (Eq a, RealFrac a) => a -> [Integer]
 getCF (properFraction -> (i, f)) = i : if f == 0 then [] else getCF (recip f)
@@ -281,9 +283,9 @@ spiralDiagonals k = spiralDiagonals' 0 0 [1 .. k ^ 2]
     spiralDiagonals' n 0 xs = case genericDrop (n - 1) xs of
         [] -> []
         (y : ys) -> y : spiralDiagonals' (n + 2) 3 ys
-    spiralDiagonals' n k xs = case genericDrop (n - 1) xs of
+    spiralDiagonals' n j xs = case genericDrop (n - 1) xs of
         [] -> []
-        (y : ys) -> y : spiralDiagonals' n (k - 1) ys
+        (y : ys) -> y : spiralDiagonals' n (j - 1) ys
 
 -- | `narcissistic k n` tests whether `n` is equal to the sum of the `k`th powers of its digits.
 narcissistic :: Integer -> Integer -> Bool
@@ -306,8 +308,8 @@ sequentialPairs (x : xs) = sequentialPairs' x (x : xs)
   where
     sequentialPairs' :: a -> [a] -> [[a]]
     sequentialPairs' _ [] = []
-    sequentialPairs' x [y] = [[y, x]]
-    sequentialPairs' x (z : y : xs) = [z, y] : sequentialPairs' x (y : xs)
+    sequentialPairs' z [w] = [[w, z]]
+    sequentialPairs' w (z : y : ws) = [z, y] : sequentialPairs' w (y : ws)
 
 pairwiseSequential :: (a -> a -> Bool) -> [a] -> Bool
 pairwiseSequential f xs | length xs > 1 = all (\[x, y] -> f x y) $ sequentialPairs xs

@@ -5,7 +5,6 @@ import Data.List.Toolbox (elemIndex, groupOn, sort, sortOn, sublists, (\\))
 import Data.Maybe (fromJust)
 import Data.Ord (Down (Down))
 import Data.Tuple.Toolbox (both)
-import System.IO.Unsafe (unsafePerformIO)
 
 data CardValue
     = One
@@ -95,8 +94,8 @@ readCard :: String -> Card
 readCard [v, s] = Card (readCardValue v) (readSuit s)
 readCard _ = error "invalid card"
 
-deck :: [Card]
-deck = Card <$> [Two .. Ace] <*> [Spade .. Diamond]
+-- deck :: [Card]
+-- deck = Card <$> [Two .. Ace] <*> [Spade .. Diamond]
 
 type Poker = [Card]
 
@@ -125,7 +124,7 @@ straight h =
         && c == pred d
         && d == pred e
   where
-    h'@[a, b, c, d, e] = map val (sort h)
+    [a, b, c, d, e] = map val (sort h)
 
 wheel :: [CardValue] -> Bool
 wheel = (== [Two, Three, Four, Five, Ace]) . sort
@@ -149,7 +148,7 @@ fullHouse :: Poker -> Bool
 fullHouse h = (threeKind h &&) . pair . (h \\) . head . filter sameValue . filter ((== 3) . length) $ sublists h
 
 hand :: Poker -> PokerHand
-hand h@[a, b, c, d, e]
+hand h@[_, _, _, _, _]
     | strFlush h' = StrFlush $ head h'
     | fourKind h' = FourKind (head h'') (head $ last h'')
     | fullHouse h' = FullHouse (head h'') (h' \\ head h'')
@@ -165,6 +164,7 @@ hand h@[a, b, c, d, e]
     h'' = sortOn (Down . length) $ groupOn val h'
     g' = map val h'
     q' = suit . (h !!) . fromJust $ elemIndex Ace g'
+hand _ = error "Not a poker hand"
 
 type PokerGame = (PokerHand, PokerHand)
 

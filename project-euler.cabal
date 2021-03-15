@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 9c2849463e530a2fe8a14c66b9e017e489db88b3b0b317cab21c467366afccff
+-- hash: a39cb9e9c45815d7d56ba84f37d38c4d5386fc4e1427bbc2deecd1553c4a62b3
 
 name:           project-euler
 version:        0.1.1.0
@@ -38,7 +38,7 @@ library
   hs-source-dirs:
       src
   default-extensions: LambdaCase MultiWayIf TupleSections RecordWildCards BangPatterns ViewPatterns TypeOperators KindSignatures InstanceSigs OverloadedStrings EmptyCase GeneralizedNewtypeDeriving ImportQualifiedPost DeriveFoldable DeriveFunctor DeriveGeneric DeriveLift DeriveTraversable
-  ghc-options: -O2
+  ghc-options: -O2 -Wall
   build-depends:
       arithmoi
     , async

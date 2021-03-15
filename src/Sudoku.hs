@@ -39,7 +39,7 @@ solve' v@(V2 x y) s = case s ! v of
   where
     solve'' :: V2 Int -> Sudoku -> [Int] -> Maybe Sudoku
     solve'' _ _ [] = Nothing
-    solve'' v@(V2 x y) s (k : ks) = solve' (V2 (x + 1) y) (Map.insert v k s) <|> solve'' v s ks
+    solve'' v'@(V2 x' y') s' (k : ks) = solve' (V2 (x' + 1) y') (Map.insert v' k s') <|> solve'' v' s' ks
 
 solve :: Sudoku -> Maybe Sudoku
 solve = solve' $ V2 0 0
