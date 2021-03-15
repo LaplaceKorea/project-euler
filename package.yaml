@@ -58,6 +58,9 @@ default-extensions:
 
 library:
   source-dirs: src
+  ghc-options:
+    - -O2
+    - -Wall
 
 executables:
   project-euler-exe:
@@ -70,14 +73,3 @@ executables:
     - -O2
     dependencies:
     - project-euler
-
-# tests:
-#   project-euler-test:
-#     main:                Spec.hs
-#     source-dirs:         test
-#     ghc-options:
-#     - -threaded
-#     - -rtsopts
-#     - -with-rtsopts=-N
-#     dependencies:
-#     - project-euler
