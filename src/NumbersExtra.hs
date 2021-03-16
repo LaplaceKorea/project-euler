@@ -128,8 +128,7 @@ backward :: (Integral a, Read a, Show a) => a -> a
 backward = undigits . reverse . digits
 
 pairwise :: (a -> a -> a) -> [a] -> [a]
-pairwise f (x : y : xs) = f x y : pairwise f (y : xs)
-pairwise _ xs = xs
+pairwise f xs = zipWith f xs $ drop 1 xs
 
 palindrome :: (Integral a, Read a, Show a, Eq a) => a -> Bool
 palindrome = (==) <*> backward
@@ -137,12 +136,12 @@ palindrome = (==) <*> backward
 -- | Does the number contain each digit from 0 to its length?
 pandigital0 :: Integer -> Bool
 pandigital0 n =
-    let k = genericLength (digits n) in ([0 .. k -1] ==) . sort $ digits n
+    let k = genericLength (digits n) in [0 .. k - 1] == sort (digits n)
 
 -- | Does the number contain each digit from 1 to its length?
 pandigital1 :: Integer -> Bool
 pandigital1 n =
-    let k = genericLength (digits n) in ([1 .. k] ==) . sort $ digits n
+    let k = genericLength (digits n) in [1 .. k] == sort (digits n)
 
 -- | Find all 0-n pandigital numbers.
 pandigitals0 :: Integer -> [Integer]
@@ -231,10 +230,8 @@ pythagsHyp l =
 
 -- | Generate the number's hailstone sequence.
 collatz :: Integer -> [Integer]
-collatz n
-    | even n = n : collatz (n `div` 2)
-    | n == 1 = [n]
-    | otherwise = n : collatz (3 * n + 1)
+collatz 1 = [1]
+collatz n = n : collatz (if even n then n `div` 2 else 3 * n + 1)
 
 factorial :: Integer -> Integer
 factorial = F.factorial . fromIntegral
@@ -299,7 +296,7 @@ stirling1, stirling2 :: Integer -> Integer -> Integer
 stirling1 0 0 = 1
 stirling1 _ 0 = 0
 stirling1 0 _ = 0
-stirling1 n k = (n -1) * stirling1 (n -1) k + stirling1 (n -1) (k -1)
+stirling1 n k = (n - 1) * stirling1 (n - 1) k + stirling1 (n - 1) (k - 1)
 stirling2 n k = (`div` factorial k) $ sum [(if odd (k - j) then negate else id) $ choose k j * j ^ n | j <- [0 .. k]]
 
 sequentialPairs :: [a] -> [[a]]

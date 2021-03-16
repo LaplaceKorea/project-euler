@@ -123,6 +123,10 @@ prettyPolynomial (zip [0 ..] . toList -> nxs) =
             sign = if signum v < 0 then "-" else "+"
          in Just $ sign ++ " " ++ (if abs v == 1 then "" else show (abs v)) ++ "x" ++ up
 
+-- | Find the derivative of a polynomial.
+ddx :: (Eq a, Num a, Enum a) => Polynomial a -> Polynomial a
+ddx (toList -> as) = mkPolynomial $ zipWith (*) [1 ..] (drop 1 as)
+
 countIntegerPartitionsWith :: [Int] -> Int -> Int
 countIntegerPartitionsWith [] _ = 0
 countIntegerPartitionsWith xs n =
