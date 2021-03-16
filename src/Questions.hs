@@ -489,10 +489,10 @@ q023 = pure . sumWhen (not . isAbundSum) $ Set.fromAscList [1 .. limit]
     limit = 28_123
 
     abundants :: Set Integer
-    abundants = Set.filter abundant $ Set.fromAscList [1 .. limit]
+    abundants = Set.fromAscList [n | n <- [1 .. limit], abundant n]
 
     isAbundSum :: Integer -> Bool
-    isAbundSum n = any abundant . Set.map (n -) $ Set.takeWhileAntitone (<= n) abundants
+    isAbundSum n = any (abundant . (n -)) $ Set.takeWhileAntitone (<= n) abundants
 
 {- |
     A permutation is an ordered arrangement of objects. For example, 3124 is one possible permutation of the digits 1, 2, 3 and 4.
