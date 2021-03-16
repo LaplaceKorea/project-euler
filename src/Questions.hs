@@ -74,7 +74,7 @@ q003 = pure . maximum $ primeFactors 600_851_475_143
     Find the largest palindrome made from the product of two 3-digit numbers.
 -}
 q004 :: IO Integer
-q004 = pure . fromMaybe 0 . find (not . palindrome) . sortOn Down $ (*) <$> [999, 998 .. 100] <*> [999, 998 .. 100]
+q004 = pure . fromMaybe 0 . find palindrome $ sortOn Down [a * b | a <- [999, 998 .. 100], b <- [a, pred a .. 100]]
 
 {- |
     2520 is the smallest number that can be divided by each of the numbers from 1 to 10 without any remainder.
