@@ -9,7 +9,7 @@
 module Questions where
 
 import Control.Lens (Identity (..), none, toListOf, (^.))
-import Control.Monad.Toolbox ((&^&), (|^|))
+import Control.Monad.Toolbox
 import Data.Bits (Bits (xor))
 import Data.Bits.Lens (bits)
 import Data.Char (chr, isAlpha, isDigit, isSpace, ord)
@@ -28,7 +28,7 @@ import Data.Polynomial qualified as Poly
 import Data.Set (Set)
 import Data.Set qualified as Set
 import Data.Time (DayOfWeek (Sunday), dayOfWeek, fromGregorian)
-import Data.Tuple.Toolbox (first, fst3, second, snd3, thd3, (&&&))
+import Data.Tuple.Toolbox
 import Data.Vector (Vector, (!))
 import Data.Vector qualified as Vector
 import Data.Word (Word32)
@@ -1873,6 +1873,23 @@ q090 = pure . genericLength . Set.fromList . map (\(xs, ys) -> sort [xs, ys]) $ 
     makesAllSquares xs ys = and $ elem <$> [(0, 1), (0, 4), (0, 9), (1, 6), (2, 5), (3, 6), (4, 9), (6, 4), (8, 1)] <*> [((,) <$> xs <*> ys) ++ ((,) <$> ys <*> xs)]
 
 {- |
+    The points P (x1, y1) and Q (x2, y2) are plotted at integer co-ordinates and are joined to the origin, O(0,0), to form ΔOPQ.
+
+    There are exactly fourteen triangles containing a right angle that can be formed when each co-ordinate lies between 0 and 2 inclusive; that is,
+    0 ≤ x1, y1, x2, y2 ≤ 2.
+
+    Given that 0 ≤ x1, y1, x2, y2 ≤ 50, how many right triangles can be formed?
+-}
+q091 :: IO Integer
+q091 = pure $ rightAngledIntegerTriangles 50
+  where
+    rightAngledIntegerTriangles :: Integer -> Integer
+    rightAngledIntegerTriangles n =
+        (3 * n ^ 2 +) . flip sumOn (V2 <$> [1 .. n] <*> [1 .. n]) $ \(V2 x y) ->
+            let p = gcd x y
+             in 2 * min (p * x `div` y) (p * (n - y) `div` x)
+
+{- |
     A number chain is created by continuously adding the square of the digits in a number to form a new number until it has been seen before. For example,
 
         - @44 -> 32 -> 13 -> 10 -> 1 -> 1@
@@ -1883,7 +1900,7 @@ q090 = pure . genericLength . Set.fromList . map (\(xs, ys) -> sort [xs, ys]) $ 
     How many starting numbers below ten million will arrive at 89?
 -}
 q092 :: IO Integer
-q092 = pure $ sumOn multinomial $ filter unhappy orderedSevens
+q092 = pure . sumOn multinomial $ filter unhappy orderedSevens
   where
     multinomial :: Integer -> Integer
     multinomial = (div <$> factorial . genericLength <*> productOn (factorial . genericLength) . group) . (\xs@(length -> x) -> if x < 7 then replicate (7 - x) 0 ++ xs else xs) . sort . digits
